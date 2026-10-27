@@ -1,0 +1,10 @@
+metric,value
+coverage80,0.797
+coverage80_static,0.685
+datum_offset_m,-27.24
+check_1995_computed,-26.704
+check_1995_literature,-26.66
+median_lead_sweep,15.0
+min_lead_sweep,7.0
+max_lead_sweep,48.0
+n_origins,345.0

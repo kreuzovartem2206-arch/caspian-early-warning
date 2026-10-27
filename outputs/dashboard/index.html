@@ -1,0 +1,478 @@
+<style>
+#dash-root .cx { font-family: var(--font-anthropic-sans); color: var(--color-fg); display: flex; flex-direction: column; gap: var(--cds-gap-lg); }
+#dash-root .cx-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
+#dash-root .cx-lead { margin: var(--cds-gap-xs) 0 0; font-size: var(--cds-font-size-body); color: var(--color-fg); max-width: 60rem; line-height: 1.5; }
+#dash-root .cx-lead b { font-weight: 600; }
+#dash-root .cx-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--cds-gap-md); }
+#dash-root .cx-kpi, #dash-root .cx-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
+#dash-root .cx-kpi-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+#dash-root .cx-kpi-value { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; margin-top: var(--cds-gap-xs); display: flex; align-items: baseline; gap: var(--cds-gap-xs); min-height: 2.2rem; }
+#dash-root .cx-unit { font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body); color: var(--color-fg-muted); }
+#dash-root .cx-kpi-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-top: var(--cds-gap-xs); line-height: 1.4; }
+#dash-root .cx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: var(--cds-gap-md); }
+#dash-root .cx-h { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+#dash-root .cx-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: var(--cds-gap-xs) 0 var(--cds-gap-md); line-height: 1.45; }
+#dash-root .cx-chart { position: relative; min-height: 220px; }
+#dash-root .cx-chart.cx-tall { min-height: 340px; }
+#dash-root .cx-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-bottom: var(--cds-gap-sm); }
+#dash-root .cx-legend span { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); }
+#dash-root .cx-sw { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+#dash-root .cx-sw.cx-box { height: 10px; opacity: .35; }
+#dash-root .cx-sw.cx-dash { background: none !important; border-top: 2px dashed var(--cds-chart-reference); height: 0; }
+#dash-root .cx-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; opacity: 0; z-index: 2; font-variant-numeric: tabular-nums; }
+#dash-root .cx-tip .cx-tip-h { color: var(--cds-text-secondary); margin-bottom: 2px; }
+#dash-root .cx-tip .cx-row { display: flex; align-items: center; gap: 6px; }
+#dash-root .cx-tip .cx-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+#dash-root .cx-axis text { fill: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+#dash-root .cx-axis line, #dash-root .cx-axis path { stroke: var(--cds-chart-axis); }
+#dash-root .cx-grid-l line { stroke: var(--cds-chart-grid); }
+#dash-root .cx-grid-l path { display: none; }
+#dash-root .cx-lbl { fill: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+#dash-root .cx-lbl-strong { fill: var(--color-fg); font-size: var(--cds-font-size-caption); font-weight: 500; }
+#dash-root .cx-table-wrap { overflow-x: auto; }
+#dash-root table.cx-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+#dash-root .cx-table th { text-align: left; font-weight: 500; color: var(--color-fg-muted); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: bottom; }
+#dash-root .cx-table td { padding: var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+#dash-root .cx-table td.cx-num, #dash-root .cx-table th.cx-num { text-align: right; white-space: nowrap; }
+#dash-root .cx-table td.cx-basis { color: var(--color-fg-muted); min-width: 16rem; }
+#dash-root .cx-method { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.55; }
+#dash-root .cx-method ol { margin: var(--cds-gap-xs) 0 0; padding-left: 1.2rem; }
+#dash-root .cx-fail { display: flex; align-items: center; justify-content: center; gap: 6px; height: 100%; min-height: inherit; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+#dash-root .cx-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+#dash-root [data-dash-source-state=empty] { color: transparent; }
+#dash-root [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+</style>
+
+<div class="cx">
+  <header>
+    <h1 class="cx-title" id="top">Каспий: можно ли было предупредить заранее</h1>
+    <p class="cx-lead dash-skeleton" id="cx-takeaway" data-source="results sweep">—</p>
+  </header>
+
+  <section class="cx-kpis" aria-label="Главные цифры">
+    <div class="cx-kpi">
+      <div class="cx-kpi-label">Волго-Каспийский канал: тревога до инцидента 2015 г.</div>
+      <div class="cx-kpi-value"><span class="dash-skeleton" id="k1" data-source="results" data-field="lead_to_incident_sustained" data-where="id=vkmsk_supply">—</span><span class="cx-unit">мес.</span></div>
+      <div class="cx-kpi-note">Непрерывная тревога до загрузки судов снабжения на 50%</div>
+    </div>
+    <div class="cx-kpi">
+      <div class="cx-kpi-label">Исторический минимум (Каламкас, Хазар): тревога до пересечения</div>
+      <div class="cx-kpi-value"><span class="dash-skeleton" id="k2" data-source="results" data-field="lead_months_sustained" data-where="id=historic_min">—</span><span class="cx-unit">мес.</span></div>
+      <div class="cx-kpi-note">Ложных тревог до пересечения: <span id="k2b" data-source="results" data-field="false_alarm_months_before_crossing" data-where="id=historic_min">—</span></div>
+    </div>
+    <div class="cx-kpi">
+      <div class="cx-kpi-label">Медиана по сетке порогов</div>
+      <div class="cx-kpi-value"><span class="dash-skeleton" id="k3" data-source="summary" data-field="value" data-where="metric=median_lead_sweep">—</span><span class="cx-unit">мес.</span></div>
+      <div class="cx-kpi-note">Размах <span id="k3a" data-source="summary" data-field="value" data-where="metric=min_lead_sweep">—</span>–<span id="k3b" data-source="summary" data-field="value" data-where="metric=max_lead_sweep">—</span> мес.; прогноз «как год назад» не дал тревоги ни разу</div>
+    </div>
+    <div class="cx-kpi">
+      <div class="cx-kpi-label">Попадание факта в 80%-й интервал</div>
+      <div class="cx-kpi-value"><span class="dash-skeleton" id="k4" data-source="summary" data-field="value" data-where="metric=coverage80">—</span></div>
+      <div class="cx-kpi-note">Без адаптивной калибровки: <span id="k4b" data-source="summary" data-field="value" data-where="metric=coverage80_static">—</span></div>
+    </div>
+  </section>
+
+  <section class="cx-card" id="level">
+    <h2 class="cx-h">Уровень Каспия, тревоги и прогноз на два года вперёд</h2>
+    <p class="cx-note">Спутниковая альтиметрия NASA, среднее за месяц, м Балтийской системы. Затенено — период непрерывной тревоги до первого пересечения порога. Справа — прогноз от последнего месяца с 80%-м интервалом.</p>
+    <div class="cx-legend" id="lg-level"></div>
+    <div class="cx-chart cx-tall" id="ch-level" data-source="level fans results"></div>
+  </section>
+
+  <div class="cx-grid">
+    <section class="cx-card" id="prob">
+      <h2 class="cx-h">Вероятность выхода ниже порога в ближайшие 24 месяца</h2>
+      <p class="cx-note">Оценка на каждый месяц выпуска только по данным до него. Тревога — от 50%. Точка — месяц, когда уровень реально опустился ниже порога.</p>
+      <div class="cx-legend" id="lg-prob"></div>
+      <div class="cx-chart" id="ch-prob" data-source="prob results"></div>
+    </section>
+    <section class="cx-card" id="sweep">
+      <h2 class="cx-h">Заблаговременность для любого порога</h2>
+      <p class="cx-note">Месяцы непрерывной тревоги до первого пересечения, по порогам от <span id="sw-a" data-source="sweep">—</span> до <span id="sw-b" data-source="sweep">—</span> м БС. Серым — месяцы ложной тревоги (уровень не опустился ниже за 24 месяца).</p>
+      <div class="cx-legend" id="lg-sweep"></div>
+      <div class="cx-chart" id="ch-sweep" data-source="sweep"></div>
+    </section>
+  </div>
+
+  <div class="cx-grid">
+    <section class="cx-card" id="acc">
+      <h2 class="cx-h">Точность прогноза по горизонту</h2>
+      <p class="cx-note">Средняя абсолютная ошибка, см. Ансамбль (локальный тренд + SARIMA) против прогноза «как год назад».</p>
+      <div class="cx-legend" id="lg-acc"></div>
+      <div class="cx-chart" id="ch-acc" data-source="accuracy"></div>
+    </section>
+    <section class="cx-card" id="rise">
+      <h2 class="cx-h">Половодье Волги по уровню моря (экспериментально)</h2>
+      <p class="cx-note">Подъём уровня с марта до пика июня–июля, в стандартных отклонениях от прошлых лет. Затор на канале в 2026 г. вызвало заиление после половодья; по этому признаку 2026 г. выше нормы, но не аномален. Индикатор придуман после события и не проверен.</p>
+      <div class="cx-legend" id="lg-rise"></div>
+      <div class="cx-chart" id="ch-rise" data-source="rise"></div>
+    </section>
+  </div>
+
+  <section class="cx-card" id="objects">
+    <h2 class="cx-h">Объекты и пороги</h2>
+    <p class="cx-note">Порог канала подобран под инцидент 2015 г. и должен быть заменён отметкой дна по промерам Росморпорта; исторический минимум — внешняя отметка.</p>
+    <div class="cx-table-wrap">
+      <table class="cx-table" id="tbl" data-source="results" data-row-key="id">
+        <thead><tr>
+          <th data-field="object">Объект</th>
+          <th class="cx-num" data-field="level_bs">Порог, м БС</th>
+          <th data-field="kind">Тип порога</th>
+          <th class="cx-num" data-field="sustained_alert_from">Тревога с</th>
+          <th class="cx-num" data-field="first_crossing">Пересечение</th>
+          <th class="cx-num" data-field="incident">Инцидент</th>
+          <th class="cx-num" data-field="lead_months_sustained">Запас, мес.</th>
+          <th class="cx-num" data-field="false_alarm_months_before_crossing">Ложные тревоги, мес.</th>
+          <th data-field="basis">Откуда порог</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="cx-card cx-method" id="method">
+    <h2 class="cx-h">Как получены цифры</h2>
+    <ol>
+      <li>Ряд уровня — NASA/USDA G-REALM (TOPEX/Poseidon, Jason-1/2/3, Sentinel-6A), привязан к Балтийской системе одной отметкой Минводресурсов Казахстана (апрель 2025); проверка по 1995 г.: <span id="chk-a" data-source="summary" data-field="value" data-where="metric=check_1995_computed">—</span> м против <span id="chk-b" data-source="summary" data-field="value" data-where="metric=check_1995_literature">—</span> м в литературе.</li>
+      <li>С января 1998 г. каждый месяц выпускается прогноз на 1–24 месяца так, будто это «сегодня»: модели видят только прошлые данные.</li>
+      <li>Интервал и вероятность строятся по ошибкам, которые к месяцу выпуска уже проверены; масштаб интервала подстраивается по прошлым промахам (adaptive conformal inference).</li>
+      <li>Тревога — вероятность уйти ниже порога в ближайшие 24 месяца не меньше 50%. Запас — от начала непрерывной тревоги до первого пересечения.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+(() => {
+  const ru = d3.formatLocale({decimal: ",", thousands: " ", grouping: [3], currency: ["", " ₽"], minus: "−"});
+  const fLevel = ru.format(".2f"), fInt = ru.format(",d"), fPct = ru.format(".1%"), fCm = ru.format(".1f"), fZ = ru.format("+.1f"), fP = ru.format(".0%");
+  const months = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+  const parseM = d3.utcParse("%Y-%m");
+  const fMonth = (s) => { if (!s) return "—"; const d = parseM(String(s).slice(0, 7)); return d ? `${months[d.getUTCMonth()]} ${d.getUTCFullYear()}` : String(s); };
+  const num = (x) => (x === "" || x == null ? NaN : Number(x));
+  const C = () => dash.colors;
+  const muted = "var(--cds-chart-muted)";
+
+  const tipFor = (box) => {
+    let t = box.querySelector(".cx-tip");
+    if (!t) { t = document.createElement("div"); t.className = "cx-tip"; box.appendChild(t); }
+    return t;
+  };
+  const showTip = (box, tip, x, y, header, rows) => {
+    tip.replaceChildren();
+    const h = document.createElement("div"); h.className = "cx-tip-h"; h.textContent = header; tip.appendChild(h);
+    rows.forEach(([color, label, value]) => {
+      const r = document.createElement("div"); r.className = "cx-row";
+      if (color) { const d = document.createElement("span"); d.className = "cx-dot"; d.style.background = color; r.appendChild(d); }
+      const s = document.createElement("span"); s.textContent = label ? `${label}: ${value}` : value; r.appendChild(s);
+      tip.appendChild(r);
+    });
+    tip.style.opacity = 1;
+    const bw = box.clientWidth, tw = tip.offsetWidth, th = tip.offsetHeight;
+    let left = x + 12; if (left + tw > bw) left = x - tw - 12; if (left < 0) left = 0;
+    let top = y - th - 8; if (top < 0) top = y + 12;
+    tip.style.left = `${left}px`; tip.style.top = `${top}px`;
+  };
+  const hideTip = (tip) => { tip.style.opacity = 0; };
+
+  const legend = (id, items) => {
+    const el = document.getElementById(id); el.replaceChildren();
+    items.forEach(([color, label, kind]) => {
+      const s = document.createElement("span");
+      const sw = document.createElement("i"); sw.className = "cx-sw" + (kind ? ` cx-${kind}` : ""); sw.style.background = color;
+      s.appendChild(sw); s.appendChild(document.createTextNode(label)); el.appendChild(s);
+    });
+  };
+  const fail = (el) => { el.replaceChildren(); const d = document.createElement("div"); d.className = "cx-fail"; d.textContent = "Failed to load"; el.appendChild(d); };
+  const axisStyle = (g) => g.attr("font-size", null).attr("font-family", null).attr("class", "cx-axis");
+  const textWidth = (svg, s) => { const t = svg.append("text").attr("class", "cx-lbl").text(s); const w = t.node().getComputedTextLength(); t.remove(); return w; };
+  const state = (...ids) => {
+    const st = ids.map((i) => dash.data(i).status);
+    if (st.every((s) => s === "ok")) return "ok";
+    if (st.some((s) => s === "error" || s === "connect" || s === "declined" || s === "missing")) return "error";
+    return "loading";
+  };
+
+  // ---------- KPIs + takeaway ----------
+  const kpis = () => {
+    const ids = ["k1", "k2", "k2b", "k3", "k3a", "k3b", "k4", "k4b"];
+    const sr = state("results"), ss = state("summary");
+    const res = sr === "ok" ? dash.data("results").data : [];
+    const sum = ss === "ok" ? dash.data("summary").data : [];
+    const R = (id, f) => { const r = res.find((d) => d.id === id); return r ? num(r[f]) : NaN; };
+    const S = (m) => { const r = sum.find((d) => d.metric === m); return r ? num(r.value) : NaN; };
+    const set = (id, v) => { const el = document.getElementById(id); el.textContent = v; el.classList.toggle("dash-skeleton", v === "—" && (sr === "loading" || ss === "loading")); };
+    const fmt = (v, f) => (isNaN(v) ? "—" : f(v));
+    set("k1", fmt(R("vkmsk_supply", "lead_to_incident_sustained"), fInt));
+    set("k2", fmt(R("historic_min", "lead_months_sustained"), fInt));
+    set("k2b", fmt(R("historic_min", "false_alarm_months_before_crossing"), fInt));
+    set("k3", fmt(S("median_lead_sweep"), fInt));
+    set("k3a", fmt(S("min_lead_sweep"), fInt));
+    set("k3b", fmt(S("max_lead_sweep"), fInt));
+    set("k4", fmt(S("coverage80"), fPct));
+    set("k4b", fmt(S("coverage80_static"), fPct));
+
+    const lead = document.getElementById("cx-takeaway");
+    if (sr === "ok" && state("sweep") === "ok") {
+      const v = res.find((d) => d.id === "vkmsk_supply"), h = res.find((d) => d.id === "historic_min");
+      const sw = dash.data("sweep").data.map((d) => num(d.lead_months_sustained)).filter((x) => !isNaN(x));
+      lead.replaceChildren();
+      const parts = [
+        "Да: ретро-прогноз по одним спутниковым данным поднял бы непрерывную тревогу по каналу с ", ["b", fMonth(v.sustained_alert_from)],
+        " — за ", ["b", `${fInt(num(v.lead_to_incident_sustained))} мес.`], " до инцидента ", fMonth(v.incident),
+        ", а по историческому минимуму — за ", ["b", `${fInt(num(h.lead_months_sustained))} мес.`], " без ложных тревог. На ",
+        fInt(sw.length), " порогах медиана запаса — ", ["b", `${fInt(d3.median(sw))} мес.`],
+        ". Затор 2026 г. из-за заиления этим методом не ловится."
+      ];
+      parts.forEach((p) => { if (Array.isArray(p)) { const b = document.createElement("b"); b.textContent = p[1]; lead.appendChild(b); } else lead.appendChild(document.createTextNode(p)); });
+      lead.classList.remove("dash-skeleton");
+    } else if (sr === "error") { lead.textContent = "—"; lead.classList.remove("dash-skeleton"); }
+  };
+
+  // ---------- Chart: level ----------
+  const drawLevel = () => {
+    const box = document.getElementById("ch-level");
+    const st = state("level", "fans", "results");
+    if (st === "error") { fail(box); return; }
+    if (st !== "ok") { box.querySelector("svg")?.remove(); return; }
+    box.querySelector(".cx-fail")?.remove();
+    const lv = dash.data("level").data.map((d) => ({t: parseM(d.month), v: num(d.level_bs), m: d.month})).filter((d) => d.t && !isNaN(d.v));
+    const fans = dash.data("fans").data.map((d) => ({c: d.case, t: parseM(d.target), f: num(d.forecast), lo: num(d.pi_lo), hi: num(d.pi_hi)}));
+    const now = fans.filter((d) => d.c === "now");
+    const res = dash.data("results").data;
+    const c = C();
+    legend("lg-level", [[c[0], "Уровень, факт"], [c[0], "Прогноз и 80%-й интервал", "box"], [c[1], "Период тревоги", "box"], ["", "Порог", "dash"]]);
+
+    const W = box.clientWidth, H = 340;
+    box.querySelector("svg")?.remove();
+    const svg = d3.select(box).append("svg").attr("width", "100%").attr("viewBox", `0 0 ${W} ${H}`).attr("role", "img").attr("aria-label", "Уровень Каспия по месяцам с порогами и прогнозом");
+    const yMin = d3.min([d3.min(lv, (d) => d.v), d3.min(now, (d) => d.lo)]), yMax = d3.max(lv, (d) => d.v);
+    const yDom = [Math.floor((yMin - 0.1) * 10) / 10, Math.ceil((yMax + 0.1) * 10) / 10];
+    const thrLabels = res.map((r) => `${fLevel(num(r.level_bs))} · ${r.id === "vkmsk_supply" ? "канал" : "ист. минимум"}`);
+    const ml = Math.ceil(textWidth(svg, fLevel(yDom[0]))) + 10;
+    const mr = Math.min(130, Math.ceil(d3.max(thrLabels, (s) => textWidth(svg, s))) + 8);
+    const m = {t: 12, r: W < 520 ? 8 : mr, b: 26, l: ml};
+    const x = d3.scaleUtc([lv[0].t, d3.max(now, (d) => d.t) || lv[lv.length - 1].t], [m.l, W - m.r]);
+    const y = d3.scaleLinear(yDom, [H - m.b, m.t]);
+    svg.append("g").attr("class", "cx-grid-l").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(6).tickSize(-(W - m.l - m.r)).tickFormat(""));
+    svg.append("g").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(6).tickFormat(fLevel).tickSizeOuter(0)).call(axisStyle).call((g) => g.select(".domain").remove());
+    svg.append("g").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(W < 520 ? 4 : 8).tickFormat(d3.utcFormat("%Y")).tickSizeOuter(0)).call(axisStyle);
+
+    // alert windows
+    res.forEach((r) => {
+      const a = parseM(String(r.sustained_alert_from || "").slice(0, 7)), b = parseM(String(r.first_crossing || "").slice(0, 7));
+      if (!a || !b) return;
+      svg.append("rect").attr("x", x(a)).attr("width", Math.max(1, x(b) - x(a))).attr("y", m.t).attr("height", H - m.b - m.t).attr("fill", c[1]).attr("opacity", 0.14);
+      const lbl = `${fInt(num(r.lead_months_sustained))} мес.`;
+      svg.append("text").attr("class", "cx-lbl-strong").attr("x", (x(a) + x(b)) / 2).attr("y", m.t + 12).attr("text-anchor", "middle").text(lbl);
+    });
+    // thresholds
+    res.forEach((r, i) => {
+      const yy = y(num(r.level_bs));
+      svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", yy).attr("y2", yy).attr("stroke", "var(--cds-chart-reference)").attr("stroke-width", 1).attr("stroke-dasharray", "4 4");
+      if (W >= 520) svg.append("text").attr("class", "cx-lbl").attr("x", W - m.r + 4).attr("y", yy + 4).text(thrLabels[i]);
+      else svg.append("text").attr("class", "cx-lbl").attr("x", m.l + 4).attr("y", yy - 4).text(thrLabels[i]);
+    });
+    // forecast band + line
+    if (now.length) {
+      const last = lv[lv.length - 1];
+      const band = [{t: last.t, lo: last.v, hi: last.v, f: last.v}, ...now];
+      svg.append("path").datum(band).attr("fill", c[0]).attr("opacity", 0.16).attr("d", d3.area().x((d) => x(d.t)).y0((d) => y(d.lo)).y1((d) => y(d.hi)));
+      svg.append("path").datum(band).attr("fill", "none").attr("stroke", c[0]).attr("stroke-width", 2).attr("stroke-dasharray", "5 4").attr("d", d3.line().x((d) => x(d.t)).y((d) => y(d.f)));
+    }
+    svg.append("path").datum(lv).attr("fill", "none").attr("stroke", c[0]).attr("stroke-width", 2).attr("stroke-linejoin", "round").attr("stroke-linecap", "round").attr("d", d3.line().x((d) => x(d.t)).y((d) => y(d.v)));
+    // incident marker
+    res.filter((r) => r.incident).forEach((r) => {
+      const t = parseM(String(r.incident).slice(0, 7)); const p = lv.find((d) => +d.t === +t); if (!p) return;
+      svg.append("circle").attr("cx", x(p.t)).attr("cy", y(p.v)).attr("r", 5).attr("fill", "var(--cds-chart-status-critical)").attr("stroke", "var(--color-panel)").attr("stroke-width", 2);
+      svg.append("text").attr("class", "cx-lbl-strong").attr("x", x(p.t) + 8).attr("y", y(p.v) + 16).text(`инцидент ${fMonth(r.incident)}`);
+    });
+
+    // hover
+    const tip = tipFor(box);
+    const all = [...lv.map((d) => ({...d, kind: "fact"})), ...now.map((d) => ({t: d.t, v: d.f, lo: d.lo, hi: d.hi, kind: "fc"}))];
+    const rule = svg.append("line").attr("y1", m.t).attr("y2", H - m.b).attr("stroke", "var(--cds-chart-axis)").attr("opacity", 0);
+    const dot = svg.append("circle").attr("r", 4).attr("fill", c[0]).attr("stroke", "var(--color-panel)").attr("stroke-width", 2).attr("opacity", 0);
+    const bis = d3.bisector((d) => d.t).center;
+    svg.append("rect").attr("x", m.l).attr("y", m.t).attr("width", W - m.l - m.r).attr("height", H - m.t - m.b).attr("fill", "transparent")
+      .on("pointermove", (ev) => {
+        const [px] = d3.pointer(ev); const d = all[bis(all, x.invert(px))]; if (!d) return;
+        rule.attr("x1", x(d.t)).attr("x2", x(d.t)).attr("opacity", 1); dot.attr("cx", x(d.t)).attr("cy", y(d.v)).attr("opacity", 1);
+        const head = `${months[d.t.getUTCMonth()]} ${d.t.getUTCFullYear()}`;
+        const rows = d.kind === "fact" ? [[null, "Уровень", `${fLevel(d.v)} м БС`]] : [[null, "Прогноз", `${fLevel(d.v)} м БС`], [null, "80%", `${fLevel(d.lo)} … ${fLevel(d.hi)}`]];
+        showTip(box, tip, x(d.t), y(d.v), head, rows);
+      })
+      .on("pointerleave", () => { rule.attr("opacity", 0); dot.attr("opacity", 0); hideTip(tip); });
+  };
+
+  // ---------- Chart: probability ----------
+  const drawProb = () => {
+    const box = document.getElementById("ch-prob");
+    const st = state("prob", "results");
+    if (st === "error") { fail(box); return; }
+    if (st !== "ok") { box.querySelector("svg")?.remove(); return; }
+    const c = C();
+    const res = dash.data("results").data;
+    const names = {vkmsk_supply: "Канал, " + fLevel(num((res.find((r) => r.id === "vkmsk_supply") || {}).level_bs)), historic_min: "Ист. минимум, " + fLevel(num((res.find((r) => r.id === "historic_min") || {}).level_bs))};
+    const rows = dash.data("prob").data.map((d) => ({id: d.threshold_id, t: parseM(d.origin), p: num(d.p_cross)})).filter((d) => d.t && !isNaN(d.p));
+    const ser = ["vkmsk_supply", "historic_min"].map((id, i) => ({id, color: c[i], name: names[id], pts: rows.filter((r) => r.id === id)}));
+    legend("lg-prob", ser.map((s) => [s.color, s.name]).concat([["", "Порог тревоги 50%", "dash"]]));
+    const W = box.clientWidth, H = 240;
+    box.querySelector("svg")?.remove();
+    const svg = d3.select(box).append("svg").attr("width", "100%").attr("viewBox", `0 0 ${W} ${H}`).attr("role", "img").attr("aria-label", "Вероятность выхода уровня ниже порога по месяцам выпуска прогноза");
+    const m = {t: 10, r: 10, b: 26, l: Math.ceil(textWidth(svg, "100%")) + 10};
+    const x = d3.scaleUtc(d3.extent(rows, (d) => d.t), [m.l, W - m.r]);
+    const y = d3.scaleLinear([0, 1], [H - m.b, m.t]);
+    svg.append("g").attr("class", "cx-grid-l").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickSize(-(W - m.l - m.r)).tickFormat(""));
+    svg.append("g").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(fP)).call(axisStyle).call((g) => g.select(".domain").remove());
+    svg.append("g").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(W < 480 ? 4 : 7).tickFormat(d3.utcFormat("%Y")).tickSizeOuter(0)).call(axisStyle);
+    svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(0.5)).attr("y2", y(0.5)).attr("stroke", "var(--cds-chart-reference)").attr("stroke-dasharray", "4 4");
+    ser.forEach((s) => {
+      svg.append("path").datum(s.pts).attr("fill", "none").attr("stroke", s.color).attr("stroke-width", 2).attr("stroke-linejoin", "round").attr("stroke-linecap", "round").attr("d", d3.line().x((d) => x(d.t)).y((d) => y(d.p)));
+      const r = res.find((q) => q.id === s.id); const t = r && parseM(String(r.first_crossing).slice(0, 7));
+      const p = t && s.pts.find((d) => +d.t === +t);
+      if (p) svg.append("circle").attr("cx", x(p.t)).attr("cy", y(p.p)).attr("r", 5).attr("fill", s.color).attr("stroke", "var(--color-panel)").attr("stroke-width", 2);
+    });
+    const tip = tipFor(box);
+    const rule = svg.append("line").attr("y1", m.t).attr("y2", H - m.b).attr("stroke", "var(--cds-chart-axis)").attr("opacity", 0);
+    const dots = ser.map((s) => svg.append("circle").attr("r", 4).attr("fill", s.color).attr("stroke", "var(--color-panel)").attr("stroke-width", 2).attr("opacity", 0));
+    svg.append("rect").attr("x", m.l).attr("y", m.t).attr("width", W - m.l - m.r).attr("height", H - m.t - m.b).attr("fill", "transparent")
+      .on("pointermove", (ev) => {
+        const [px] = d3.pointer(ev); const t0 = x.invert(px);
+        const pts = ser.map((s) => s.pts[d3.bisector((d) => d.t).center(s.pts, t0)]);
+        const t = pts[0].t; rule.attr("x1", x(t)).attr("x2", x(t)).attr("opacity", 1);
+        pts.forEach((p, i) => p && dots[i].attr("cx", x(p.t)).attr("cy", y(p.p)).attr("opacity", 1));
+        showTip(box, tip, x(t), y(d3.max(pts, (p) => p.p)), `Прогноз от ${months[t.getUTCMonth()]} ${t.getUTCFullYear()}`, ser.map((s, i) => [s.color, s.name, fP(pts[i].p)]));
+      })
+      .on("pointerleave", () => { rule.attr("opacity", 0); dots.forEach((d) => d.attr("opacity", 0)); hideTip(tip); });
+  };
+
+  // ---------- Chart: threshold sweep ----------
+  const drawSweep = () => {
+    const box = document.getElementById("ch-sweep");
+    const st = state("sweep");
+    if (st === "error") { fail(box); return; }
+    if (st !== "ok") { box.querySelector("svg")?.remove(); return; }
+    const c = C();
+    const rows = dash.data("sweep").data.map((d) => ({lv: num(d.level_bs), lead: num(d.lead_months_sustained), fa: num(d.false_alarm_months_before_crossing), from: d.sustained_alert_from, cross: d.first_crossing}));
+    legend("lg-sweep", [[c[0], "Запас до пересечения"], [muted, "Ложная тревога"]]);
+    const W = box.clientWidth, bh = 14, gap = 6, H = rows.length * (bh + gap) + 34;
+    box.querySelector("svg")?.remove();
+    const svg = d3.select(box).append("svg").attr("width", "100%").attr("viewBox", `0 0 ${W} ${H}`).attr("role", "img").attr("aria-label", "Запас времени до пересечения по порогам");
+    const ml = Math.ceil(d3.max(rows, (r) => textWidth(svg, fLevel(r.lv)))) + 10;
+    const m = {t: 4, r: 28, b: 24, l: ml};
+    const x = d3.scaleLinear([0, d3.max(rows, (r) => Math.max(r.lead || 0, r.fa || 0))], [m.l, W - m.r]).nice();
+    const y = d3.scaleBand(rows.map((r) => r.lv), [m.t, H - m.b]).paddingInner(gap / (bh + gap));
+    svg.append("g").attr("class", "cx-grid-l").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(5).tickSize(-(H - m.b - m.t)).tickFormat(""));
+    svg.append("g").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(5).tickFormat(fInt).tickSizeOuter(0)).call(axisStyle);
+    svg.append("g").selectAll("text").data(rows).join("text").attr("class", "cx-lbl").attr("x", m.l - 6).attr("y", (r) => y(r.lv) + y.bandwidth() / 2 + 4).attr("text-anchor", "end").text((r) => fLevel(r.lv));
+    const bw = y.bandwidth();
+    svg.append("g").selectAll("rect").data(rows.filter((r) => r.fa > 0)).join("rect").attr("x", m.l).attr("y", (r) => y(r.lv) + bw * 0.62).attr("height", bw * 0.38).attr("width", (r) => x(r.fa) - m.l).attr("rx", 2).attr("fill", muted);
+    svg.append("g").selectAll("rect").data(rows).join("rect").attr("x", m.l).attr("y", (r) => y(r.lv)).attr("height", bw * 0.55).attr("width", (r) => Math.max(0, x(r.lead || 0) - m.l)).attr("rx", 3).attr("fill", c[0]);
+    svg.append("g").selectAll("text").data(rows).join("text").attr("class", "cx-lbl").attr("x", (r) => x(r.lead || 0) + 4).attr("y", (r) => y(r.lv) + bw * 0.5).text((r) => (isNaN(r.lead) ? "" : fInt(r.lead)));
+    const tip = tipFor(box);
+    svg.append("g").selectAll("rect").data(rows).join("rect").attr("x", 0).attr("y", (r) => y(r.lv) - gap / 2).attr("width", W).attr("height", bw + gap).attr("fill", "transparent")
+      .on("pointermove", (ev, r) => {
+        const [px, py] = d3.pointer(ev, box);
+        showTip(box, tip, px, py, `Порог ${fLevel(r.lv)} м БС`, [[c[0], "Тревога с", fMonth(r.from)], [null, "Пересечение", fMonth(r.cross)], [null, "Запас", `${isNaN(r.lead) ? "—" : fInt(r.lead)} мес.`], [muted, "Ложная тревога", `${fInt(r.fa || 0)} мес.`]]);
+      })
+      .on("pointerleave", () => hideTip(tip));
+  };
+
+  // ---------- Chart: accuracy ----------
+  const drawAcc = () => {
+    const box = document.getElementById("ch-acc");
+    const st = state("accuracy");
+    if (st === "error") { fail(box); return; }
+    if (st !== "ok") { box.querySelector("svg")?.remove(); return; }
+    const c = C();
+    const rows = dash.data("accuracy").data.map((d) => ({h: num(d.h), e: num(d.mae_ensemble) * 100, n: num(d.mae_naive) * 100}));
+    const ser = [{k: "e", name: "Ансамбль", color: c[0]}, {k: "n", name: "Как год назад", color: muted}];
+    legend("lg-acc", ser.map((s) => [s.color, s.name]));
+    const W = box.clientWidth, H = 220;
+    box.querySelector("svg")?.remove();
+    const svg = d3.select(box).append("svg").attr("width", "100%").attr("viewBox", `0 0 ${W} ${H}`).attr("role", "img").attr("aria-label", "Ошибка прогноза по горизонту");
+    const yMax = d3.max(rows, (r) => Math.max(r.e, r.n));
+    const m = {t: 10, r: 12, b: 34, l: Math.ceil(textWidth(svg, fInt(Math.ceil(yMax)))) + 12};
+    const x = d3.scaleLinear(d3.extent(rows, (r) => r.h), [m.l, W - m.r]);
+    const y = d3.scaleLinear([0, yMax], [H - m.b, m.t]).nice();
+    svg.append("g").attr("class", "cx-grid-l").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickSize(-(W - m.l - m.r)).tickFormat(""));
+    svg.append("g").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(fInt)).call(axisStyle).call((g) => g.select(".domain").remove());
+    svg.append("g").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues([1, 6, 12, 18, 24].filter((v) => v <= d3.max(rows, (r) => r.h))).tickFormat(fInt).tickSizeOuter(0)).call(axisStyle);
+    svg.append("text").attr("class", "cx-lbl").attr("x", W - m.r).attr("y", H - 4).attr("text-anchor", "end").text("горизонт, мес.");
+    ser.forEach((s) => svg.append("path").datum(rows).attr("fill", "none").attr("stroke", s.color).attr("stroke-width", 2).attr("stroke-linejoin", "round").attr("stroke-linecap", "round").attr("d", d3.line().x((r) => x(r.h)).y((r) => y(r[s.k]))));
+    const tip = tipFor(box);
+    const rule = svg.append("line").attr("y1", m.t).attr("y2", H - m.b).attr("stroke", "var(--cds-chart-axis)").attr("opacity", 0);
+    const dots = ser.map((s) => svg.append("circle").attr("r", 4).attr("fill", s.color).attr("stroke", "var(--color-panel)").attr("stroke-width", 2).attr("opacity", 0));
+    svg.append("rect").attr("x", m.l).attr("y", m.t).attr("width", W - m.l - m.r).attr("height", H - m.t - m.b).attr("fill", "transparent")
+      .on("pointermove", (ev) => {
+        const [px] = d3.pointer(ev); const r = rows[d3.bisector((d) => d.h).center(rows, x.invert(px))];
+        rule.attr("x1", x(r.h)).attr("x2", x(r.h)).attr("opacity", 1);
+        ser.forEach((s, i) => dots[i].attr("cx", x(r.h)).attr("cy", y(r[s.k])).attr("opacity", 1));
+        showTip(box, tip, x(r.h), y(r.n), `На ${fInt(r.h)} мес. вперёд`, ser.map((s) => [s.color, s.name, `${fCm(r[s.k])} см`]));
+      })
+      .on("pointerleave", () => { rule.attr("opacity", 0); dots.forEach((d) => d.attr("opacity", 0)); hideTip(tip); });
+  };
+
+  // ---------- Chart: spring rise ----------
+  const drawRise = () => {
+    const box = document.getElementById("ch-rise");
+    const st = state("rise");
+    if (st === "error") { fail(box); return; }
+    if (st !== "ok") { box.querySelector("svg")?.remove(); return; }
+    const c = C();
+    const rows = dash.data("rise").data.map((d) => ({yr: String(d.year), z: num(d.z_vs_past), rise: num(d.rise_m), flag: String(d.flag).toLowerCase() === "true", mar: num(d.march_level_bs)})).filter((d) => !isNaN(d.z));
+    legend("lg-rise", [[c[1], "Год с флагом: уровень ниже исторического минимума и половодье выше нормы"], [muted, "Остальные годы"]]);
+    const W = box.clientWidth, H = 220;
+    box.querySelector("svg")?.remove();
+    const svg = d3.select(box).append("svg").attr("width", "100%").attr("viewBox", `0 0 ${W} ${H}`).attr("role", "img").attr("aria-label", "Подъём уровня весной по годам");
+    const ext = d3.extent(rows, (r) => r.z);
+    const m = {t: 10, r: 8, b: 26, l: Math.ceil(textWidth(svg, fZ(Math.floor(ext[0])))) + 10};
+    const x = d3.scaleBand(rows.map((r) => r.yr), [m.l, W - m.r]).padding(0.25);
+    const y = d3.scaleLinear([Math.min(0, ext[0]), Math.max(0, ext[1])], [H - m.b, m.t]).nice();
+    svg.append("g").attr("class", "cx-grid-l").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickSize(-(W - m.l - m.r)).tickFormat(""));
+    svg.append("g").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(fZ)).call(axisStyle).call((g) => g.select(".domain").remove());
+    const step = Math.ceil(rows.length / Math.max(2, Math.floor((W - m.l) / 44)));
+    svg.append("g").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(rows.map((r) => r.yr).filter((_, i, a) => (a.length - 1 - i) % step === 0)).tickSizeOuter(0)).call(axisStyle);
+    svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(0)).attr("y2", y(0)).attr("stroke", "var(--cds-chart-axis)");
+    svg.append("g").selectAll("rect").data(rows).join("rect").attr("x", (r) => x(r.yr)).attr("width", x.bandwidth()).attr("y", (r) => Math.min(y(0), y(r.z))).attr("height", (r) => Math.abs(y(r.z) - y(0))).attr("rx", Math.min(3, x.bandwidth() / 2)).attr("fill", (r) => (r.flag ? c[1] : muted));
+    const tip = tipFor(box);
+    svg.append("g").selectAll("rect").data(rows).join("rect").attr("x", (r) => x(r.yr) - x.step() * x.paddingInner() / 2).attr("width", x.step()).attr("y", m.t).attr("height", H - m.t - m.b).attr("fill", "transparent")
+      .on("pointermove", (ev, r) => showTip(box, tip, x(r.yr) + x.bandwidth() / 2, y(r.z), r.yr, [[null, "Подъём", `${fCm(r.rise * 100)} см`], [null, "Отклонение", `${fZ(r.z)} σ`], [null, "Уровень в марте", `${fLevel(r.mar)} м БС`]]))
+      .on("pointerleave", () => hideTip(tip));
+  };
+
+  // ---------- Table ----------
+  const drawTable = () => {
+    const tb = document.querySelector("#tbl tbody");
+    const st = state("results");
+    if (st !== "ok") { tb.replaceChildren(); return; }
+    tb.replaceChildren();
+    dash.data("results").data.forEach((r) => {
+      const tr = document.createElement("tr"); tr.dataset.key = r.id;
+      const cells = [
+        [r.object, ""], [fLevel(num(r.level_bs)), "cx-num"], [r.kind === "external" ? "внешний" : "подобран", ""],
+        [fMonth(r.sustained_alert_from), "cx-num"], [fMonth(r.first_crossing), "cx-num"], [r.incident ? fMonth(r.incident) : "—", "cx-num"],
+        [isNaN(num(r.lead_months_sustained)) ? "—" : fInt(num(r.lead_months_sustained)), "cx-num"],
+        [fInt(num(r.false_alarm_months_before_crossing)), "cx-num"], [r.basis, "cx-basis"],
+      ];
+      cells.forEach(([t, cls]) => { const td = document.createElement("td"); if (cls) td.className = cls; td.textContent = t; tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+  };
+
+  const fills = () => {
+    const sw = state("sweep") === "ok" ? dash.data("sweep").data.map((d) => num(d.level_bs)) : [];
+    document.getElementById("sw-a").textContent = sw.length ? fLevel(d3.max(sw)) : "—";
+    document.getElementById("sw-b").textContent = sw.length ? fLevel(d3.min(sw)) : "—";
+    const sum = state("summary") === "ok" ? dash.data("summary").data : [];
+    const S = (k) => { const r = sum.find((d) => d.metric === k); return r ? fLevel(num(r.value)) : "—"; };
+    document.getElementById("chk-a").textContent = S("check_1995_computed");
+    document.getElementById("chk-b").textContent = S("check_1995_literature");
+  };
+
+  dash.onData(() => {
+    fills(); kpis();
+    drawLevel(); drawProb(); drawSweep(); drawAcc(); drawRise(); drawTable();
+  });
+})();
+</script>
