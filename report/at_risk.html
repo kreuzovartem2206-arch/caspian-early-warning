@@ -1,0 +1,326 @@
+<title>Объекты ЛУКОЙЛа в зоне обмеления</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: evidence report, one 72rem column: verdict, one table, one depth history chart, per-object evidence cards, cross-checks. */
+:root {
+  --bg: #f6f8fa;
+  --panel: #ffffff;
+  --ink: #142231;
+  --ink-2: #4a5a6b;
+  --ink-3: #7a8896;
+  --rule: #d9e1e8;
+  --sea: #1d5c8c;
+  --sea-soft: rgba(29, 92, 140, 0.14);
+  --alert: #c98a1b;
+  --alert-soft: rgba(201, 138, 27, 0.16);
+  --bad: #b8382c;
+  --ok: #2d7d4f;
+  --muted-mark: #a9b5c0;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --step--1: 0.8125rem; --step-0: 0.9375rem; --step-1: 1.125rem; --step-2: 1.5rem; --step-3: 2.125rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1820; --panel: #15212c; --ink: #e3eaf1; --ink-2: #a9b8c6; --ink-3: #7f909f; --rule: #263646;
+    --sea: #6fb0e3; --sea-soft: rgba(111, 176, 227, 0.18); --alert: #e0a443; --alert-soft: rgba(224, 164, 67, 0.18);
+    --bad: #f07a6c; --ok: #6cc290; --muted-mark: #4d5f70; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1820; --panel: #15212c; --ink: #e3eaf1; --ink-2: #a9b8c6; --ink-3: #7f909f; --rule: #263646;
+  --sea: #6fb0e3; --sea-soft: rgba(111, 176, 227, 0.18); --alert: #e0a443; --alert-soft: rgba(224, 164, 67, 0.18);
+  --bad: #f07a6c; --ok: #6cc290; --muted-mark: #4d5f70; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: var(--step-0); line-height: 1.55; }
+.page { max-width: 72rem; margin-inline: auto; padding-block: 2.5rem 4rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 2.5rem; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: var(--step-3); }
+h2 { font-size: var(--step-2); }
+h3 { font-size: var(--step-1); font-family: var(--font-body); font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.lead { font-size: var(--step-1); color: var(--ink); max-width: 62ch; }
+.lead b, p b { font-weight: 600; }
+.stack { display: flex; flex-direction: column; gap: .75rem; }
+.stack-lg { display: flex; flex-direction: column; gap: 1.25rem; }
+.num, td, .mono { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.fig { background: var(--panel); padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: .35rem; min-width: 0; }
+.fig .v { font-family: var(--font-display); font-size: 2rem; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.fig .v small { font-family: var(--font-body); font-size: var(--step-0); font-weight: 400; color: var(--ink-2); margin-left: .25rem; }
+.fig .k { font-size: var(--step--1); color: var(--ink-2); }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 1.25rem; display: flex; flex-direction: column; gap: .75rem; min-width: 0; }
+.note { font-size: var(--step--1); color: var(--ink-2); max-width: 80ch; }
+.legend { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; font-size: var(--step--1); color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: .4rem; }
+.sw { width: 16px; height: 3px; border-radius: 2px; display: inline-block; }
+.sw.box { height: 11px; }
+.sw.dash { height: 0; border-top: 2px dashed var(--ink-3); background: none; }
+.sw.dot { width: 10px; height: 10px; border-radius: 50%; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.axis text, .lbl { fill: var(--ink-3); font-family: var(--font-mono); font-size: 11px; }
+.lbl-ink { fill: var(--ink); font-family: var(--font-body); font-size: 12px; font-weight: 600; }
+.axis path, .axis line { stroke: var(--rule); }
+.grid line { stroke: var(--rule); stroke-opacity: .7; }
+.grid path { display: none; }
+.tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: .4rem .6rem; font-size: var(--step--1); white-space: nowrap; opacity: 0; z-index: 3; font-variant-numeric: tabular-nums; }
+.tip .h { color: var(--ink-3); font-family: var(--font-mono); margin-bottom: 2px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr)); gap: 1.25rem; }
+.case { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 1.5rem; align-items: start; }
+@media (max-width: 900px) { .case { grid-template-columns: minmax(0, 1fr); } }
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+th { text-align: left; font-weight: 500; color: var(--ink-3); padding: .45rem .55rem; border-bottom: 1px solid var(--rule); vertical-align: bottom; white-space: nowrap; }
+td { padding: .45rem .55rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+td.r, th.r { text-align: right; white-space: nowrap; }
+td.m { font-family: var(--font-mono); }
+td.nw { white-space: nowrap; }
+tr.hl td { background: var(--alert-soft); }
+.pill { display: inline-block; font-size: 11px; font-weight: 600; padding: .05rem .45rem; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.pill.ok { color: var(--ok); }
+.pill.bad { color: var(--bad); }
+.pill.warn { color: var(--alert); }
+.facts { display: grid; gap: .5rem; padding: 0; margin: 0; list-style: none; }
+.facts li { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--rule); }
+.facts li:last-child { border-bottom: 0; padding-bottom: 0; }
+.facts .when { font-family: var(--font-mono); font-size: var(--step--1); color: var(--ink-3); padding-top: .1rem; }
+.verdict { border-left: 3px solid var(--sea); padding: .15rem 0 .15rem .9rem; }
+.verdict.miss { border-left-color: var(--bad); }
+ol.method { margin: 0; padding-left: 1.2rem; display: grid; gap: .4rem; max-width: 80ch; }
+a { color: var(--sea); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--sea); outline-offset: 2px; }
+footer { font-size: var(--step--1); color: var(--ink-3); border-top: 1px solid var(--rule); padding-top: 1rem; }
+
+.ev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 32rem), 1fr)); gap: 1.25rem; }
+.ev { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: .7rem; min-width: 0; }
+.ev-head { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; flex-wrap: wrap; }
+.ev-head h3 { font-family: var(--font-display); font-size: var(--step-1); }
+.ev .meta { font-size: var(--step--1); color: var(--ink-3); }
+.ev ul { margin: 0; padding-left: 1.1rem; display: grid; gap: .35rem; font-size: var(--step-0); }
+.ev .src { font-size: var(--step--1); color: var(--ink-2); }
+.depthbar { display: grid; grid-template-columns: 1fr; gap: .25rem; }
+</style>
+
+<main class="page">
+  <header class="stack">
+    <div class="eyebrow">ЛУКОЙЛ · Каспий · объекты без аварий · данные на октябрь 2026 г.</div>
+    <h1>Объекты ЛУКОЙЛа в зоне обмеления</h1>
+    <p class="lead">Аварий на этих объектах не было, но на четырёх из них глубина уже сейчас меньше рабочей или уходит ниже неё при сгоне: <b>Грайфер, Хазар, Каламкас-море и Филановского</b>. Это следует из наблюдений, а не из прогноза: фактического уровня моря со спутника, опубликованных глубин участков и местных водомерных постов.</p>
+  </header>
+
+  <section class="figs" aria-label="Главные цифры">
+    <div class="fig"><div class="k">Уровень моря, <span id="k-mnow">—</span>, спутник</div><div class="v" id="k-now">—<small>м БС</small></div></div>
+    <div class="fig"><div class="k">Рекордный минимум ряда, <span id="k-mmin">—</span></div><div class="v" id="k-min">—<small>м БС</small></div></div>
+    <div class="fig"><div class="k">Рабочая глубина: осадка 4,5 м + 0,5 м под килем</div><div class="v" id="k-need">—<small>м</small></div></div>
+    <div class="fig"><div class="k">Глубина на Филановского потеряна с ввода в 2016 г.</div><div class="v" id="k-fil">—<small>м</small></div></div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-tab">
+    <h2 id="h-tab">Глубина на объектах: при вводе и сейчас</h2>
+    <p class="note">Глубина = опубликованная глубина участка (наименьшая, приведена к −28,0 м БС) + отклонение фактического уровня от −28,0 м. Красным — меньше рабочих 5,0 м. «Мес. ниже 5 м» — сколько месяцев с января 2024 г. по октябрь 2026 г. средняя глубина была меньше рабочей; в скобках — с учётом обычного значимого сгона 0,64 м.</p>
+    <div class="tbl-wrap"><table id="t-main"><thead><tr>
+      <th>Объект</th><th class="r">Глубина по данным, м</th><th class="r">При вводе / проекте</th><th class="r">Сейчас</th><th class="r">Потеряно, м</th><th class="r">При сгоне 1,17 м</th><th class="r">Мес. ниже 5 м с 2024 г.</th><th>Вывод</th>
+    </tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-hist">
+    <h2 id="h-hist">Как менялась глубина на участках, 2008–2026</h2>
+    <p class="note">Рассчитано по фактическому месячному уровню моря. Красная линия — рабочая глубина 5,0 м, жёлтая зона — запас, который съедает сильный сгон (1,17 м). Точки — ввод объекта или начало проекта.</p>
+    <div class="legend" id="lg-hist"></div>
+    <div class="chart" id="ch-hist" role="img" aria-label="Глубина моря на участках объектов ЛУКОЙЛа по месяцам 2008–2026"></div>
+  </section>
+
+  <section class="stack-lg" aria-labelledby="h-ev">
+    <h2 id="h-ev">Подтверждения по каждому объекту</h2>
+    <div class="ev-grid" id="ev"></div>
+  </section>
+
+  <section class="two" aria-label="Независимая проверка и контроль">
+    <div class="panel">
+      <h2>Проверка по водомерным постам Казгидромета</h2>
+      <p class="note">Прогноз уровня на основе наблюдений постов (модель MIKE 21), Северный Каспий, 16–21 июля и 20–25 августа 2026 г., м БС. Пост Кулалы — ближайший к Каламкас-море и Хазару.</p>
+      <div class="tbl-wrap"><table id="t-kz"><thead><tr><th>Пост</th><th class="r">Июль, ср.</th><th class="r">Август, ср.</th><th class="r">Август, мин.</th></tr></thead><tbody></tbody></table></div>
+      <p class="note">На посту Кулалы уровень на 0,3 м ниже среднего по морю по спутнику (−29,12 м в августе 2026 г.). Значит, у казахстанских месторождений глубина ещё меньше, чем в основной таблице: на Хазаре <b id="kz-kh">—</b> м, на Каламкас-море <b id="kz-kl">—</b> м.</p>
+    </div>
+    <div class="panel">
+      <h2>Для сравнения: объекты вне зоны риска</h2>
+      <p class="note">Те же расчёты по более глубоким участкам. Уровень падает везде одинаково, но здесь запас глубины пока большой.</p>
+      <div class="tbl-wrap"><table id="t-ctrl"><thead><tr><th>Объект</th><th class="r">Сейчас, м</th><th class="r">Потеряно с ввода, м</th><th class="r">Глубина &lt; 5 м по тренду</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-lim">
+    <h2 id="h-lim">Что надо уточнить</h2>
+    <ol class="method">
+      <li>Глубины участков взяты из открытых источников и приведены к условному уровню −28,0 м БС. Явно это указано только для месторождения им. Грайфера. Если глубины мерили при уровне около −27 м (2000–2005 гг.), реальные глубины сейчас ещё на 1 м меньше.</li>
+      <li>Рабочая глубина 5,0 м — это проектная осадка Волго-Каспийского канала 4,5 м плюс 0,5 м под килем (допущение). Фактическая осадка судов, которые обслуживают каждый объект, неизвестна. Грайфер работает при глубине меньше 5 м, значит там используют суда с меньшей осадкой.</li>
+      <li>Сгоны взяты по посту Пешной (Ивкина и др., 2019): средний значимый 0,64 м, наибольший за 1996–2018 гг. 1,17 м. Для участков в российском секторе они могут отличаться.</li>
+      <li>Нужны промеры у платформ и на подходах, а также данные о реальной осадке судов снабжения.</li>
+    </ol>
+  </section>
+
+  <footer>Уровень: <a href="https://earth.gsfc.nasa.gov/gwm/lake/270" target="_blank" rel="noopener">NASA G-REALM, Caspian Sea</a>, привязка −29,21 м БС в апреле 2025 г. (Минводресурсов РК) · глубины: <a href="https://neftegaz.ru/news/dobycha/767756-gazokondensatnoe-mestorozhdenie-im-kuvykina-na-shelfe-kaspiyskogo-morya-vvedut-v-ekspluatatsiyu-v-20/" target="_blank" rel="noopener">Neftegaz.RU</a>, <a href="https://www.nsenergybusiness.com/projects/rakushechnoye-offshore-field-caspian-sea/" target="_blank" rel="noopener">NS Energy</a>, <a href="https://www.kmg.kz/en/company/projects/all/proekt-sovmestnogo-osvoeniya-mestorozhdeniy-kalamkas-more-khazar/" target="_blank" rel="noopener">КазМунайГаз</a>, <a href="https://petrodigest.ru/fields/imeni-vladimira-filanovskogo-mestorozhdenie" target="_blank" rel="noopener">PetroDigest</a>, <a href="https://uglevodorody.ru/field/mestorozhdenie-im-yus-kuvykina" target="_blank" rel="noopener">uglevodorody.ru</a>, национальный доклад РФ для Тегеранской конвенции · посты: <a href="https://www.kazhydromet.kz/uploads/files_calendar/12145/file/6a59d8a0ed631rus.pdf" target="_blank" rel="noopener">Казгидромет, июль 2026</a>, <a href="https://www.kazhydromet.kz/uploads/files_calendar/12531/file/6a87da0917e9a20-25-pu-rus.pdf" target="_blank" rel="noopener">август 2026</a> · сгоны: <a href="https://journal.kazhydromet.kz/kazgidro/article/download/763/2165/6413" target="_blank" rel="noopener">Ивкина и др., 2019</a> · осадка канала: <a href="https://ko.ru/news/v-astrakhanskoy-oblasti-suda-vstali-v-15-kilometrovuyu-probku-iz-za-obmeleniya-kanala/" target="_blank" rel="noopener">ko.ru</a> · данные: outputs/at_risk_objects.csv в ветке feature/caspian-early-warning.</footer>
+</main>
+
+<script id="data" type="application/json">{"rows":[{"id":"grayfer","object":"Месторождение им. Грайфера (Ракушечное)","operator":"ЛУКОЙЛ, 100%","status":"добыча с 2023 г.","depth_published_m":"5–5.4","depth_source":"средняя 5,4 м (−28 м БС) — Neftegaz.RU; 5–8 м — NS Energy","ref_year":2023,"ref_label":"добыча с 2023 г.","level_ref_bs":-28.97,"depth_at_ref_m":4.03,"depth_now_m":3.72,"depth_lost_m":0.31,"depth_at_record_low_m":3.5,"depth_now_strong_setdown_m":2.55,"months_below_need_since_2024":34,"months_below_need_with_setdown_since_2024":34,"n_months_since_2024":34,"local_gauge":null,"depth_at_local_gauge_min_m":null,"model_depth_oct2028_m":3.44,"model_depth_oct2028_p10_m":3.07,"model_p24_below_need_setdown_typ":1.0,"trend_year_below_need_r2019":2026.8,"trend_year_below_need_r2005":2026.8,"at_risk_now":true},{"id":"khazar","object":"Хазар","operator":"Kalamkas-Khazar Operating, ЛУКОЙЛ 50%","status":"проект, первая нефть 2028–2029 гг.","depth_published_m":"6–7","depth_source":"около 6–8 м — КазМунайГаз","ref_year":2023,"ref_label":"контракт 2023 г., FEED","level_ref_bs":-28.97,"depth_at_ref_m":5.03,"depth_now_m":4.72,"depth_lost_m":0.31,"depth_at_record_low_m":4.5,"depth_now_strong_setdown_m":3.55,"months_below_need_since_2024":32,"months_below_need_with_setdown_since_2024":34,"n_months_since_2024":34,"local_gauge":"Кулалы","depth_at_local_gauge_min_m":4.54,"model_depth_oct2028_m":4.44,"model_depth_oct2028_p10_m":4.07,"model_p24_below_need_setdown_typ":1.0,"trend_year_below_need_r2019":2026.8,"trend_year_below_need_r2005":2026.8,"at_risk_now":true},{"id":"kalamkas","object":"Каламкас-море","operator":"Kalamkas-Khazar Operating, ЛУКОЙЛ 50%","status":"проект, первая нефть 2028–2029 гг.","depth_published_m":"7–7.5","depth_source":"7–8 м — КазМунайГаз","ref_year":2023,"ref_label":"контракт 2023 г., FEED","level_ref_bs":-28.97,"depth_at_ref_m":6.03,"depth_now_m":5.72,"depth_lost_m":0.31,"depth_at_record_low_m":5.5,"depth_now_strong_setdown_m":4.55,"months_below_need_since_2024":0,"months_below_need_with_setdown_since_2024":8,"n_months_since_2024":34,"local_gauge":"Кулалы","depth_at_local_gauge_min_m":5.54,"model_depth_oct2028_m":5.44,"model_depth_oct2028_p10_m":5.07,"model_p24_below_need_setdown_typ":0.95,"trend_year_below_need_r2019":2030.4,"trend_year_below_need_r2005":2034.6,"at_risk_now":true},{"id":"filanovsky","object":"Месторождение им. Филановского","operator":"ЛУКОЙЛ, 100%","status":"добыча с 2016 г.","depth_published_m":"7–9","depth_source":"7–11 м — PetroDigest","ref_year":2016,"ref_label":"добыча с октября 2016 г.","level_ref_bs":-27.97,"depth_at_ref_m":7.03,"depth_now_m":5.72,"depth_lost_m":1.31,"depth_at_record_low_m":5.5,"depth_now_strong_setdown_m":4.55,"months_below_need_since_2024":0,"months_below_need_with_setdown_since_2024":8,"n_months_since_2024":34,"local_gauge":null,"depth_at_local_gauge_min_m":null,"model_depth_oct2028_m":5.44,"model_depth_oct2028_p10_m":5.07,"model_p24_below_need_setdown_typ":0.95,"trend_year_below_need_r2019":2030.4,"trend_year_below_need_r2005":2034.6,"at_risk_now":true},{"id":"korchagin","object":"Месторождение им. Корчагина","operator":"ЛУКОЙЛ, 100%","status":"добыча с 2010 г.","depth_published_m":"11–12","depth_source":"11–13 м — национальный доклад РФ, Тегеранская конвенция","ref_year":2010,"ref_label":"добыча с 2010 г.","level_ref_bs":-27.35,"depth_at_ref_m":11.65,"depth_now_m":9.72,"depth_lost_m":1.93,"depth_at_record_low_m":9.5,"depth_now_strong_setdown_m":8.55,"months_below_need_since_2024":0,"months_below_need_with_setdown_since_2024":0,"n_months_since_2024":34,"local_gauge":null,"depth_at_local_gauge_min_m":null,"model_depth_oct2028_m":9.44,"model_depth_oct2028_p10_m":9.07,"model_p24_below_need_setdown_typ":0.0,"trend_year_below_need_r2019":2051.1,"trend_year_below_need_r2005":2079.5,"at_risk_now":false},{"id":"kuvykin","object":"Месторождение им. Кувыкина (Сарматское)","operator":"ЛУКОЙЛ, 100%","status":"проект, ввод около 2029 г.","depth_published_m":"15","depth_source":"около 15 м — uglevodorody.ru","ref_year":2023,"ref_label":"проект, ввод около 2029 г.","level_ref_bs":-28.97,"depth_at_ref_m":14.03,"depth_now_m":13.72,"depth_lost_m":0.31,"depth_at_record_low_m":13.5,"depth_now_strong_setdown_m":12.55,"months_below_need_since_2024":0,"months_below_need_with_setdown_since_2024":0,"n_months_since_2024":34,"local_gauge":null,"depth_at_local_gauge_min_m":null,"model_depth_oct2028_m":13.44,"model_depth_oct2028_p10_m":13.07,"model_p24_below_need_setdown_typ":0.0,"trend_year_below_need_r2019":2071.8,"trend_year_below_need_r2005":2124.5,"at_risk_now":false},{"id":"khvalynskoye","object":"Хвалынское","operator":"ЛУКОЙЛ, совместно с КазМунайГазом","status":"проект","depth_published_m":"25–27.5","depth_source":"25–30 м — национальный доклад РФ, Тегеранская конвенция","ref_year":2023,"ref_label":"проект","level_ref_bs":-28.97,"depth_at_ref_m":24.03,"depth_now_m":23.72,"depth_lost_m":0.31,"depth_at_record_low_m":23.5,"depth_now_strong_setdown_m":22.55,"months_below_need_since_2024":0,"months_below_need_with_setdown_since_2024":0,"n_months_since_2024":34,"local_gauge":null,"depth_at_local_gauge_min_m":null,"model_depth_oct2028_m":23.44,"model_depth_oct2028_p10_m":23.07,"model_p24_below_need_setdown_typ":0.0,"trend_year_below_need_r2019":2123.6,"trend_year_below_need_r2005":2236.8,"at_risk_now":false}],"need":5.0,"draft":4.5,"ukc":0.5,"setdown_typ":0.64,"setdown_max":1.17,"datum":-28.0,"level_now":-29.277,"month_now":"2026-10","level_min":-29.497,"month_min":"2025-11","level":[["2008-01",-27.377],["2008-02",-27.347],["2008-03",-27.273],["2008-04",-27.2],["2008-05",-27.13],["2008-06",-27.047],["2008-07",-27.032],["2008-08",-27.105],["2008-09",-27.218],["2008-10",-27.333],["2008-11",-27.412],["2008-12",-27.416],["2009-01",-27.442],["2009-02",-27.375],["2009-03",-27.28],["2009-04",-27.243],["2009-05",-27.197],["2009-06",-27.073],["2009-07",-27.103],["2009-08",-27.187],["2009-09",-27.223],["2009-10",-27.317],["2009-11",-27.347],["2009-12",-27.37],["2010-01",-27.423],["2010-02",-27.4],["2010-03",-27.353],["2010-04",-27.317],["2010-05",-27.227],["2010-06",-27.08],["2010-07",-27.153],["2010-08",-27.24],["2010-09",-27.393],["2010-10",-27.473],["2010-11",-27.55],["2010-12",-27.567],["2011-01",-27.587],["2011-02",-27.547],["2011-03",-27.547],["2011-04",-27.477],["2011-05",-27.45],["2011-06",-27.357],["2011-07",-27.383],["2011-08",-27.48],["2011-09",-27.59],["2011-10",-27.623],["2011-11",-27.67],["2011-12",-27.697],["2012-01",-27.657],["2012-02",-27.687],["2012-03",-27.68],["2012-04",-27.577],["2012-05",-27.533],["2012-06",-27.423],["2012-07",-27.403],["2012-08",-27.438],["2012-09",-27.61],["2012-10",-27.667],["2012-11",-27.79],["2012-12",-27.78],["2013-01",-27.803],["2013-02",-27.727],["2013-03",-27.695],["2013-04",-27.647],["2013-05",-27.54],["2013-06",-27.483],["2013-07",-27.443],["2013-08",-27.513],["2013-09",-27.595],["2013-10",-27.703],["2013-11",-27.76],["2013-12",-27.777],["2014-01",-27.797],["2014-02",-27.753],["2014-03",-27.76],["2014-04",-27.7],["2014-05",-27.64],["2014-06",-27.613],["2014-07",-27.62],["2014-08",-27.72],["2014-09",-27.807],["2014-10",-27.947],["2014-11",-27.983],["2014-12",-28.022],["2015-01",-28.01],["2015-02",-28.01],["2015-03",-27.94],["2015-04",-27.953],["2015-05",-27.903],["2015-06",-27.793],["2015-07",-27.817],["2015-08",-27.923],["2015-09",-28.003],["2015-10",-28.11],["2015-11",-28.087],["2015-12",-28.153],["2016-01",-28.105],["2016-02",-28.1],["2016-03",-28.073],["2016-04",-28.032],["2016-05",-27.87],["2016-06",-27.773],["2016-07",-27.765],["2016-08",-27.837],["2016-09",-27.932],["2016-10",-28.01],["2016-11",-28.09],["2016-12",-28.075],["2017-01",-28.125],["2017-02",-28.113],["2017-03",-28.035],["2017-04",-28.023],["2017-05",-27.937],["2017-06",-27.845],["2017-07",-27.82],["2017-08",-27.86],["2017-09",-27.89],["2017-10",-28.06],["2017-11",-28.117],["2017-12",-28.11],["2018-01",-28.12],["2018-02",-28.16],["2018-03",-28.01],["2018-04",-28.0],["2018-05",-27.947],["2018-06",-27.863],["2018-07",-27.84],["2018-08",-27.915],["2018-09",-28.12],["2018-10",-28.247],["2018-11",-28.29],["2018-12",-28.307],["2019-01",-28.287],["2019-02",-28.3],["2019-03",-28.27],["2019-04",-28.177],["2019-05",-28.113],["2019-06",-28.043],["2019-07",-28.073],["2019-08",-28.155],["2019-09",-28.26],["2019-10",-28.37],["2019-11",-28.423],["2019-12",-28.43],["2020-01",-28.383],["2020-02",-28.3],["2020-03",-28.32],["2020-04",-28.18],["2020-05",-28.147],["2020-06",-27.997],["2020-07",-28.017],["2020-08",-28.047],["2020-09",-28.207],["2020-10",-28.35],["2020-11",-28.363],["2020-12",-28.474],["2021-01",-28.482],["2021-02",-28.418],["2021-03",-28.488],["2021-04",-28.445],["2021-05",-28.36],["2021-06",-28.265],["2021-07",-28.253],["2021-08",-28.367],["2021-09",-28.477],["2021-10",-28.612],["2021-11",-28.748],["2021-12",-28.728],["2022-01",-28.77],["2022-02",-28.73],["2022-03",-28.744],["2022-04",-28.707],["2022-05",-28.563],["2022-06",-28.517],["2022-07",-28.567],["2022-08",-28.603],["2022-09",-28.74],["2022-10",-28.853],["2022-11",-28.893],["2022-12",-29.003],["2023-01",-29.03],["2023-02",-29.03],["2023-03",-28.98],["2023-04",-28.947],["2023-05",-28.847],["2023-06",-28.77],["2023-07",-28.778],["2023-08",-28.907],["2023-09",-28.963],["2023-10",-29.07],["2023-11",-29.123],["2023-12",-29.18],["2024-01",-29.2],["2024-02",-29.23],["2024-03",-29.185],["2024-04",-29.14],["2024-05",-29.037],["2024-06",-28.915],["2024-07",-28.952],["2024-08",-29.027],["2024-09",-29.087],["2024-10",-29.243],["2024-11",-29.267],["2024-12",-29.32],["2025-01",-29.37],["2025-02",-29.323],["2025-03",-29.3],["2025-04",-29.21],["2025-05",-29.17],["2025-06",-29.113],["2025-07",-29.1],["2025-08",-29.153],["2025-09",-29.19],["2025-10",-29.363],["2025-11",-29.497],["2025-12",-29.487],["2026-01",-29.457],["2026-02",-29.447],["2026-03",-29.36],["2026-04",-29.373],["2026-05",-29.243],["2026-06",-29.153],["2026-07",-29.06],["2026-08",-29.123],["2026-09",-29.217],["2026-10",-29.277]],"kazhydromet":{"Кулалы":{"jul_mean":-29.41,"jul_min":-29.46,"aug_mean":-29.43,"aug_min":-29.46},"Тюлений":{"jul_mean":-29.22,"jul_min":-29.27,"aug_mean":-29.22,"aug_min":-29.27},"Пешной":{"jul_mean":-28.79,"jul_min":-28.83,"aug_mean":-28.91,"aug_min":-28.94}},"n_since":34}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const ru = d3.formatLocale({decimal: ",", thousands: " ", grouping: [3], currency: ["", ""], minus: "−"});
+  const f2 = ru.format(".2f"), f1 = ru.format(".1f"), f0 = ru.format(",d"), fp = ru.format(".0%");
+  const MON = ["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"];
+  const pm = d3.utcParse("%Y-%m");
+  const fm = (s) => { const d = pm(String(s).slice(0, 7)); return d ? `${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}` : "—"; };
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const R = Object.fromEntries(D.rows.map((r) => [r.id, r]));
+  const AT = ["grayfer", "khazar", "kalamkas", "filanovsky"], CTRL = ["korchagin", "kuvykin", "khvalynskoye"];
+  const setV = (id, v) => { const el = document.getElementById(id); (el.firstChild && el.firstChild.nodeType === 3 ? el.firstChild : el).textContent = v; };
+
+  setV("k-now", f2(D.level_now)); document.getElementById("k-mnow").textContent = fm(D.month_now);
+  setV("k-min", f2(D.level_min)); document.getElementById("k-mmin").textContent = fm(D.month_min);
+  setV("k-need", f1(D.need)); setV("k-fil", f1(R.filanovsky.depth_lost_m));
+
+  const verdict = (r) => r.depth_now_m < D.need ? ["уже ниже 5 м", "bad"] : r.depth_now_strong_setdown_m < D.need ? ["ниже 5 м при сгоне", "warn"] : ["запас есть", "ok"];
+  const cell = (tr, v, c) => { const td = document.createElement("td"); if (c) td.className = c; td.textContent = v; tr.appendChild(td); return td; };
+  const pill = (tr, [label, cls]) => { const td = document.createElement("td"); const p = document.createElement("span"); p.className = "pill " + cls; p.textContent = label; td.appendChild(p); tr.appendChild(td); };
+  [...AT, ...CTRL].forEach((id) => {
+    const r = R[id], tr = document.createElement("tr");
+    const n = document.createElement("td"); const a = document.createElement("div"); a.textContent = r.object; const b = document.createElement("div"); b.className = "note"; b.textContent = r.status; n.append(a, b); tr.appendChild(n);
+    cell(tr, r.depth_published_m.replace(".", ","), "r m");
+    cell(tr, `${f1(r.depth_at_ref_m)} (${r.ref_year})`, "r m");
+    const now = cell(tr, f1(r.depth_now_m), "r m"); if (r.depth_now_m < D.need) now.style.color = "var(--bad)";
+    cell(tr, f1(r.depth_lost_m), "r m");
+    const sd = cell(tr, f1(r.depth_now_strong_setdown_m), "r m"); if (r.depth_now_strong_setdown_m < D.need) sd.style.color = "var(--bad)";
+    cell(tr, `${f0(r.months_below_need_since_2024)} (${f0(r.months_below_need_with_setdown_since_2024)}) из ${f0(r.n_months_since_2024)}`, "r m");
+    pill(tr, verdict(r));
+    if (id === "korchagin") tr.style.borderTop = "2px solid var(--rule)";
+    document.querySelector("#t-main tbody").appendChild(tr);
+  });
+
+  // evidence cards
+  const EV = {
+    grayfer: {
+      lines: (r) => [
+        `Средняя глубина участка — 5,4 м при уровне −28 м БС (Neftegaz.RU), по другим данным 5–8 м (NS Energy).`,
+        `При вводе в ${r.ref_year} г. средний уровень был ${f2(r.level_ref_bs)} м, глубина в мелкой части — ${f1(r.depth_at_ref_m)} м. Сейчас ${f1(r.depth_now_m)} м, в рекордный минимум ноября 2025 г. — ${f1(r.depth_at_record_low_m)} м.`,
+        `Все ${f0(r.months_below_need_since_2024)} месяцев с января 2024 г. глубина меньше 5 м. При сильном сгоне — ${f1(r.depth_now_strong_setdown_m)} м.`,
+        `Опорные блоки платформ в 2021–2022 гг. везли по Волго-Каспийскому каналу; для прохода каравана канал специально углубляли до паспортной глубины (Корабел.ру, март 2022).`,
+      ],
+      src: [["Neftegaz.RU", "https://neftegaz.ru/news/dobycha/767756-gazokondensatnoe-mestorozhdenie-im-kuvykina-na-shelfe-kaspiyskogo-morya-vvedut-v-ekspluatatsiyu-v-20/"], ["NS Energy", "https://www.nsenergybusiness.com/projects/rakushechnoye-offshore-field-caspian-sea/"], ["Корабел.ру", "https://www.korabel.ru/news/comments/lukoyl_sohranil_grafik_osvoeniya_mestorozhdeniya_imeni_grayfera_na_kaspii.html"]],
+    },
+    khazar: {
+      lines: (r) => [
+        `Глубина участка — около 6–8 м (КазМунайГаз). В мелкой части сейчас ${f1(r.depth_now_m)} м; по посту Кулалы (август 2026 г.) — ${f1(r.depth_at_local_gauge_min_m)} м.`,
+        `${f0(r.months_below_need_since_2024)} из ${f0(r.n_months_since_2024)} месяцев с января 2024 г. глубина в мелкой части меньше 5 м.`,
+        `В ОВОС проекта прямо сказано: из-за снижения уровня моря и обмеления в районе Уральской седловины для доступа к месторождениям нужен морской канал 75,1 км с выемкой 24,35 млн м³ (ROGTEC).`,
+        `В марте 2026 г. КазМунайГаз приостановил проект из-за санкций против ЛУКОЙЛа; дноуглубление канала не начато (Kaspika, август 2026 г.). Пока проект стоит, глубина продолжает уменьшаться.`,
+      ],
+      src: [["КазМунайГаз", "https://www.kmg.kz/en/company/projects/all/proekt-sovmestnogo-osvoeniya-mestorozhdeniy-kalamkas-more-khazar/"], ["ROGTEC", "https://www.rogtecmagazine.com/lukoil-faces-logistics-challenge-in-kazakhstan-project-due-to-caspian-sea-shallowness"], ["PetroCouncil", "https://petrocouncil.kz/ru/novost/pochemu-kazmunajgaz-zamorozil-proekt-kalamkas-hazar"], ["Kaspika", "https://kaspika.org/ru/2026/08/28/kazmunaygaz-ostanovil-razrabotku-mestorozhdeniy/"]],
+    },
+    kalamkas: {
+      lines: (r) => [
+        `Глубина участка — 7–8 м (КазМунайГаз). Сейчас ${f1(r.depth_now_m)} м; по посту Кулалы (август 2026 г.) — ${f1(r.depth_at_local_gauge_min_m)} м.`,
+        `В спокойную погоду глубины пока хватает, но с учётом обычного значимого сгона (0,64 м) она была меньше 5 м в ${f0(r.months_below_need_with_setdown_since_2024)} месяцах из ${f0(r.n_months_since_2024)} с января 2024 г. При сильном сгоне сейчас — ${f1(r.depth_now_strong_setdown_m)} м.`,
+        `Тот же подходной путь через Уральскую седловину, что и у Хазара: по ОВОС без канала длиной 75,1 км платформы не доставить.`,
+      ],
+      src: [["КазМунайГаз", "https://www.kmg.kz/en/company/projects/all/proekt-sovmestnogo-osvoeniya-mestorozhdeniy-kalamkas-more-khazar/"], ["ROGTEC", "https://www.rogtecmagazine.com/lukoil-faces-logistics-challenge-in-kazakhstan-project-due-to-caspian-sea-shallowness"]],
+    },
+    filanovsky: {
+      lines: (r) => [
+        `Глубина участка — 7–11 м (PetroDigest). При вводе в октябре 2016 г. средний уровень был ${f2(r.level_ref_bs)} м, глубина в мелкой части — ${f1(r.depth_at_ref_m)} м. Сейчас ${f1(r.depth_now_m)} м: за 10 лет потеряно ${f1(r.depth_lost_m)} м, ${fp(r.depth_lost_m / r.depth_at_ref_m)} глубины.`,
+        `С учётом обычного значимого сгона глубина была меньше 5 м в ${f0(r.months_below_need_with_setdown_since_2024)} месяцах из ${f0(r.n_months_since_2024)} с января 2024 г. При сильном сгоне сейчас — ${f1(r.depth_now_strong_setdown_m)} м.`,
+        `Центральная технологическая платформа Филановского принимает нефть с Грайфера (8,5 км), поэтому обмеление здесь затрагивает два месторождения.`,
+      ],
+      src: [["PetroDigest", "https://petrodigest.ru/fields/imeni-vladimira-filanovskogo-mestorozhdenie"], ["NS Energy", "https://www.nsenergybusiness.com/projects/rakushechnoye-offshore-field-caspian-sea/"]],
+    },
+  };
+  const ev = document.getElementById("ev");
+  AT.forEach((id) => {
+    const r = R[id], card = document.createElement("article"); card.className = "ev";
+    const head = document.createElement("div"); head.className = "ev-head";
+    const h = document.createElement("h3"); h.textContent = r.object;
+    const [label, cls] = verdict(r); const p = document.createElement("span"); p.className = "pill " + cls; p.textContent = label;
+    head.append(h, p);
+    const meta = document.createElement("div"); meta.className = "meta"; meta.textContent = `${r.operator} · ${r.status}`;
+    const ul = document.createElement("ul"); EV[id].lines(r).forEach((t) => { const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+    const src = document.createElement("div"); src.className = "src"; src.append("Источники: ");
+    EV[id].src.forEach(([n, u], i) => { if (i) src.append(", "); const a = document.createElement("a"); a.href = u; a.target = "_blank"; a.rel = "noopener"; a.textContent = n; src.appendChild(a); });
+    card.append(head, meta, ul, src); ev.appendChild(card);
+  });
+
+  // Kazhydromet table
+  Object.entries(D.kazhydromet).forEach(([k, v]) => {
+    const tr = document.createElement("tr"); cell(tr, k, ""); cell(tr, f2(v.jul_mean), "r m"); cell(tr, f2(v.aug_mean), "r m"); cell(tr, f2(v.aug_min), "r m");
+    document.querySelector("#t-kz tbody").appendChild(tr);
+  });
+  document.getElementById("kz-kh").textContent = f1(R.khazar.depth_at_local_gauge_min_m);
+  document.getElementById("kz-kl").textContent = f1(R.kalamkas.depth_at_local_gauge_min_m);
+  // control table
+  const yr = (v) => (v == null || isNaN(v) ? "—" : v > 2100 ? "после 2100" : String(Math.floor(v)));
+  CTRL.forEach((id) => { const r = R[id], tr = document.createElement("tr"); cell(tr, r.object, ""); cell(tr, f1(r.depth_now_m), "r m"); cell(tr, `${f1(r.depth_lost_m)} (с ${r.ref_year})`, "r m"); cell(tr, yr(r.trend_year_below_need_r2019), "r m"); document.querySelector("#t-ctrl tbody").appendChild(tr); });
+
+  // depth history chart
+  const series = [
+    {key: "grayfer", name: "Грайфер (5,0 м при −28)", d: R.grayfer},
+    {key: "khazar", name: "Хазар (6,0 м)", d: R.khazar},
+    {key: "filanovsky", name: "Филановского и Каламкас-море (7,0 м)", d: R.filanovsky},
+  ];
+  const depthRef = (r) => parseFloat(String(r.depth_published_m).split(/[–-]/)[0]);
+  const level = D.level.map(([m, v]) => ({t: pm(m), v, m}));
+  const tipOf = (box) => { let t = box.querySelector(".tip"); if (!t) { t = document.createElement("div"); t.className = "tip"; box.appendChild(t); } return t; };
+  const axisStyle = (g) => g.attr("font-size", null).attr("font-family", null).attr("class", "axis");
+
+  function drawHist() {
+    const box = document.getElementById("ch-hist"); box.querySelector("svg")?.remove();
+    const colors = [css("--bad"), css("--alert"), css("--sea")];
+    const lg = document.getElementById("lg-hist"); lg.replaceChildren();
+    series.forEach((s, i) => { const sp = document.createElement("span"); const sw = document.createElement("i"); sw.className = "sw"; sw.style.background = colors[i]; sp.append(sw, s.name); lg.appendChild(sp); });
+    const W = Math.max(320, box.clientWidth), H = W < 600 ? 280 : 340, narrow = W < 600;
+    const m = {t: 12, r: narrow ? 12 : 60, b: 26, l: 40};
+    const svg = d3.select(box).append("svg").attr("viewBox", `0 0 ${W} ${H}`);
+    const x = d3.scaleUtc([level[0].t, level[level.length - 1].t], [m.l, W - m.r]);
+    const y = d3.scaleLinear([3, 8.5], [H - m.b, m.t]);
+    svg.append("rect").attr("x", m.l).attr("width", W - m.l - m.r).attr("y", y(D.need + D.setdown_max)).attr("height", y(D.need) - y(D.need + D.setdown_max)).attr("fill", css("--alert-soft"));
+    svg.append("rect").attr("x", m.l).attr("width", W - m.l - m.r).attr("y", y(D.need)).attr("height", y(3) - y(D.need)).attr("fill", css("--bad")).attr("opacity", 0.07);
+    svg.append("g").attr("class", "grid").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(6).tickSize(-(W - m.l - m.r)).tickFormat(""));
+    svg.append("g").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(6).tickFormat(f0)).call(axisStyle).call((g) => g.select(".domain").remove());
+    svg.append("g").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(narrow ? 5 : 9).tickFormat(d3.utcFormat("%Y")).tickSizeOuter(0)).call(axisStyle);
+    svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(D.need)).attr("y2", y(D.need)).attr("stroke", css("--bad")).attr("stroke-dasharray", "4 3");
+    svg.append("text").attr("class", "lbl").attr("x", m.l + 4).attr("y", y(D.need) + 13).text("5,0 м — рабочая глубина");
+    svg.append("text").attr("class", "lbl").attr("x", m.l + 4).attr("y", y(D.need + D.setdown_max) - 4).text("6,2 м — с запасом на сильный сгон");
+    series.forEach((s, i) => {
+      const d0 = depthRef(s.d);
+      const pts = level.map((p) => ({t: p.t, v: d0 + (p.v - D.datum)}));
+      svg.append("path").datum(pts).attr("fill", "none").attr("stroke", colors[i]).attr("stroke-width", 2).attr("stroke-linejoin", "round").attr("d", d3.line().x((p) => x(p.t)).y((p) => y(p.v)));
+      const t0 = new Date(Date.UTC(s.d.ref_year, s.key === "filanovsky" ? 9 : 0, 1));
+      const p0 = pts.reduce((a, b) => (Math.abs(b.t - t0) < Math.abs(a.t - t0) ? b : a));
+      svg.append("circle").attr("cx", x(p0.t)).attr("cy", y(p0.v)).attr("r", 5).attr("fill", colors[i]).attr("stroke", css("--panel")).attr("stroke-width", 2);
+      const last = pts[pts.length - 1];
+      if (!narrow) svg.append("text").attr("class", "lbl").attr("x", W - m.r + 6).attr("y", y(last.v) + 4).text(`${f1(last.v)} м`);
+    });
+    const tip = tipOf(box), rule = svg.append("line").attr("y1", m.t).attr("y2", H - m.b).attr("stroke", css("--ink-3")).attr("opacity", 0);
+    const bis = d3.bisector((p) => p.t).center;
+    svg.append("rect").attr("x", m.l).attr("y", m.t).attr("width", W - m.l - m.r).attr("height", H - m.t - m.b).attr("fill", "transparent")
+      .on("pointermove", (ev) => {
+        const [px] = d3.pointer(ev); const p = level[bis(level, x.invert(px))]; const s = box.clientWidth / W;
+        rule.attr("x1", x(p.t)).attr("x2", x(p.t)).attr("opacity", 1);
+        tip.replaceChildren(); const h = document.createElement("div"); h.className = "h"; h.textContent = `${MON[p.t.getUTCMonth()]} ${p.t.getUTCFullYear()} · уровень ${f2(p.v)} м`; tip.appendChild(h);
+        series.forEach((ss) => { const dv = document.createElement("div"); dv.textContent = `${ss.name.split(" (")[0]}: ${f1(depthRef(ss.d) + (p.v - D.datum))} м`; tip.appendChild(dv); });
+        tip.style.opacity = 1; const bw = box.clientWidth, tw = tip.offsetWidth; let left = x(p.t) * s + 12; if (left + tw > bw) left = x(p.t) * s - tw - 12; tip.style.left = Math.max(0, left) + "px"; tip.style.top = "8px";
+      })
+      .on("pointerleave", () => { rule.attr("opacity", 0); tip.style.opacity = 0; });
+  }
+  drawHist();
+  let rt; new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(drawHist, 120); }).observe(document.querySelector(".page"));
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", drawHist);
+  new MutationObserver(drawHist).observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme"]});
+})();
+</script>
