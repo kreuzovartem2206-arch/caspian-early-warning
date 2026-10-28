@@ -1,0 +1,420 @@
+<title>Каспий: ретро-прогноз уровня</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a hydrographic report, one 72rem column; findings first, then each case with its own forecast table, then method. */
+:root {
+  --bg: #f6f8fa;
+  --panel: #ffffff;
+  --ink: #142231;
+  --ink-2: #4a5a6b;
+  --ink-3: #7a8896;
+  --rule: #d9e1e8;
+  --sea: #1d5c8c;
+  --sea-soft: rgba(29, 92, 140, 0.14);
+  --alert: #c98a1b;
+  --alert-soft: rgba(201, 138, 27, 0.16);
+  --bad: #b8382c;
+  --ok: #2d7d4f;
+  --muted-mark: #a9b5c0;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --step--1: 0.8125rem; --step-0: 0.9375rem; --step-1: 1.125rem; --step-2: 1.5rem; --step-3: 2.125rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1820; --panel: #15212c; --ink: #e3eaf1; --ink-2: #a9b8c6; --ink-3: #7f909f; --rule: #263646;
+    --sea: #6fb0e3; --sea-soft: rgba(111, 176, 227, 0.18); --alert: #e0a443; --alert-soft: rgba(224, 164, 67, 0.18);
+    --bad: #f07a6c; --ok: #6cc290; --muted-mark: #4d5f70; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1820; --panel: #15212c; --ink: #e3eaf1; --ink-2: #a9b8c6; --ink-3: #7f909f; --rule: #263646;
+  --sea: #6fb0e3; --sea-soft: rgba(111, 176, 227, 0.18); --alert: #e0a443; --alert-soft: rgba(224, 164, 67, 0.18);
+  --bad: #f07a6c; --ok: #6cc290; --muted-mark: #4d5f70; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: var(--step-0); line-height: 1.55; }
+.page { max-width: 72rem; margin-inline: auto; padding-block: 2.5rem 4rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 2.5rem; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: var(--step-3); }
+h2 { font-size: var(--step-2); }
+h3 { font-size: var(--step-1); font-family: var(--font-body); font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.lead { font-size: var(--step-1); color: var(--ink); max-width: 62ch; }
+.lead b, p b { font-weight: 600; }
+.stack { display: flex; flex-direction: column; gap: .75rem; }
+.stack-lg { display: flex; flex-direction: column; gap: 1.25rem; }
+.num, td, .mono { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.fig { background: var(--panel); padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: .35rem; min-width: 0; }
+.fig .v { font-family: var(--font-display); font-size: 2rem; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.fig .v small { font-family: var(--font-body); font-size: var(--step-0); font-weight: 400; color: var(--ink-2); margin-left: .25rem; }
+.fig .k { font-size: var(--step--1); color: var(--ink-2); }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 1.25rem; display: flex; flex-direction: column; gap: .75rem; min-width: 0; }
+.note { font-size: var(--step--1); color: var(--ink-2); max-width: 80ch; }
+.legend { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; font-size: var(--step--1); color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: .4rem; }
+.sw { width: 16px; height: 3px; border-radius: 2px; display: inline-block; }
+.sw.box { height: 11px; }
+.sw.dash { height: 0; border-top: 2px dashed var(--ink-3); background: none; }
+.sw.dot { width: 10px; height: 10px; border-radius: 50%; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.axis text, .lbl { fill: var(--ink-3); font-family: var(--font-mono); font-size: 11px; }
+.lbl-ink { fill: var(--ink); font-family: var(--font-body); font-size: 12px; font-weight: 600; }
+.axis path, .axis line { stroke: var(--rule); }
+.grid line { stroke: var(--rule); stroke-opacity: .7; }
+.grid path { display: none; }
+.tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: .4rem .6rem; font-size: var(--step--1); white-space: nowrap; opacity: 0; z-index: 3; font-variant-numeric: tabular-nums; }
+.tip .h { color: var(--ink-3); font-family: var(--font-mono); margin-bottom: 2px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr)); gap: 1.25rem; }
+.case { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 1.5rem; align-items: start; }
+@media (max-width: 900px) { .case { grid-template-columns: minmax(0, 1fr); } }
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+th { text-align: left; font-weight: 500; color: var(--ink-3); padding: .45rem .55rem; border-bottom: 1px solid var(--rule); vertical-align: bottom; white-space: nowrap; }
+td { padding: .45rem .55rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+td.r, th.r { text-align: right; white-space: nowrap; }
+td.m { font-family: var(--font-mono); }
+td.nw { white-space: nowrap; }
+tr.hl td { background: var(--alert-soft); }
+.pill { display: inline-block; font-size: 11px; font-weight: 600; padding: .05rem .45rem; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.pill.ok { color: var(--ok); }
+.pill.bad { color: var(--bad); }
+.pill.warn { color: var(--alert); }
+.facts { display: grid; gap: .5rem; padding: 0; margin: 0; list-style: none; }
+.facts li { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--rule); }
+.facts li:last-child { border-bottom: 0; padding-bottom: 0; }
+.facts .when { font-family: var(--font-mono); font-size: var(--step--1); color: var(--ink-3); padding-top: .1rem; }
+.verdict { border-left: 3px solid var(--sea); padding: .15rem 0 .15rem .9rem; }
+.verdict.miss { border-left-color: var(--bad); }
+ol.method { margin: 0; padding-left: 1.2rem; display: grid; gap: .4rem; max-width: 80ch; }
+a { color: var(--sea); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--sea); outline-offset: 2px; }
+footer { font-size: var(--step--1); color: var(--ink-3); border-top: 1px solid var(--rule); padding-top: 1rem; }
+</style>
+
+<main class="page">
+  <header class="stack">
+    <div class="eyebrow">ЛУКОЙЛ · Северный Каспий · ретро-прогноз 1998–2026</div>
+    <h1>Можно ли было заранее увидеть обмеление у объектов ЛУКОЙЛа</h1>
+    <p class="lead">Для медленного падения уровня — да. Прогноз, который видел только прошлые данные, в октябре 2013 г. дал вероятность <b>54%</b>, что уровень уйдёт ниже −28,0 м в течение двух лет. Это произошло в декабре 2014 г., а суда снабжения стали грузиться на 50% в апреле 2015 г. Затор на канале весной 2026 г. по уровню моря <b>не предсказывается</b>: в тот год уровень рос.</p>
+  </header>
+
+  <section class="figs" aria-label="Главные цифры">
+    <div class="fig"><div class="k">Тревога до инцидента на канале (апрель 2015)</div><div class="v" id="f1">—<small>мес.</small></div></div>
+    <div class="fig"><div class="k">Тревога до перехода исторического минимума (январь 2023)</div><div class="v" id="f2">—<small>мес.</small></div></div>
+    <div class="fig"><div class="k">Средняя ошибка прогноза на 12 месяцев</div><div class="v" id="f3">—<small>см</small></div></div>
+    <div class="fig"><div class="k">Скорость падения уровня, 2019–2025</div><div class="v" id="f4">—<small>см/год</small></div></div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-level">
+    <h2 id="h-level">Уровень моря, пороги объектов и тревоги</h2>
+    <p class="note">Средний уровень за месяц по спутниковой альтиметрии, м Балтийской системы. Жёлтая полоса — месяцы непрерывной тревоги до первого выхода ниже порога. Справа — прогноз от октября 2026 г. с 80%-м интервалом.</p>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--sea)"></i>Уровень, факт</span>
+      <span><i class="sw box" style="background:var(--sea-soft)"></i>Прогноз, 80%</span>
+      <span><i class="sw box" style="background:var(--alert-soft)"></i>Тревога</span>
+      <span><i class="sw dash"></i>Порог</span>
+      <span><i class="sw dot" style="background:var(--bad)"></i>Инцидент</span>
+    </div>
+    <div class="chart" id="ch-level" role="img" aria-label="Уровень Каспия 1992–2026 с порогами и прогнозом"></div>
+  </section>
+
+  <section class="stack-lg" aria-labelledby="h-c1">
+    <div class="stack">
+      <div class="eyebrow">Случай 1 · Волго-Каспийский канал · порог −28,00 м</div>
+      <h2 id="h-c1">Суда снабжения месторождений Корчагина и Филановского</h2>
+    </div>
+    <div class="case">
+      <div class="stack">
+        <ul class="facts">
+          <li><span class="when">ноя 2011</span><span>Первая тревога: P = 52%. До ноября 2012 г. она 13 месяцев была ложной: в следующие 24 месяца уровень ниже −28,0 м не ушёл.</span></li>
+          <li><span class="when">окт 2013</span><span>Тревога становится непрерывной (P = 54%) и больше не снимается.</span></li>
+          <li><span class="when">июн 2014</span><span>P = 62%.</span></li>
+          <li><span class="when">дек 2014</span><span>Уровень впервые ниже −28,0 м: <span class="mono">−28,02</span> м. P = 92%.</span></li>
+          <li><span class="when">апр 2015</span><span>ТАСС: суда ЛУКОЙЛ-Нижневолжскнефть грузятся на 50%, продукты на платформах — «критично». Уровень <span class="mono">−27,95</span> м.</span></li>
+          <li><span class="when">янв 2016</span><span>Суда грузятся на 30%. Уровень <span class="mono">−28,11</span> м.</span></li>
+        </ul>
+        <p class="verdict">Запас: <b>14 месяцев</b> до пересечения порога и <b>18</b> до инцидента. Но прогноз недооценил падение: через 12 месяцев ошибся на 16 см вверх, хотя факт остался внутри интервала почти на всём горизонте.</p>
+      </div>
+      <div class="panel">
+        <h3>Прогноз, выпущенный в октябре 2013 г., и что было на самом деле</h3>
+        <div class="tbl-wrap"><table id="t-2013"><thead><tr><th class="r">Через, мес.</th><th>Месяц</th><th class="r">Прогноз, м</th><th class="r">80%-й интервал</th><th class="r">Факт, м</th><th class="r">Ошибка, см</th><th>В интервале</th></tr></thead><tbody></tbody></table></div>
+        <p class="note">Выделены месяц первого пересечения и месяц инцидента.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stack-lg" aria-labelledby="h-c2">
+    <div class="stack">
+      <div class="eyebrow">Случай 2 · Уральская седловина · порог −29,01 м</div>
+      <h2 id="h-c2">Каламкас-море и Хазар: исторический минимум 1977 г.</h2>
+    </div>
+    <div class="case">
+      <div class="stack">
+        <ul class="facts">
+          <li><span class="when">янв 2021</span><span>P = 12%: риск виден, тревоги нет.</span></li>
+          <li><span class="when">окт 2021</span><span>P = 23%.</span></li>
+          <li><span class="when">янв 2022</span><span>Тревога: P = 52%. Ложных тревог до этого не было.</span></li>
+          <li><span class="when">янв 2023</span><span>Уровень <span class="mono">−29,03</span> м — ниже минимума 1977 г. (−29,01 м).</span></li>
+          <li><span class="when">2024–2025</span><span>ОВОС КМГ и ЛУКОЙЛа: из-за обмеления в районе Уральской седловины нужен морской канал 75,1 км, работы 2026–2029 гг.</span></li>
+          <li><span class="when">ноя 2025</span><span>Минимум ряда: <span class="mono">−29,50</span> м.</span></li>
+        </ul>
+        <p class="verdict">Запас: <b>12 месяцев</b>, без ложных тревог. Прогноз снова был оптимистичнее факта: −28,82 м против −29,03 м через 12 месяцев (ошибка 21 см), на нижней границе интервала.</p>
+      </div>
+      <div class="panel">
+        <h3>Прогноз, выпущенный в январе 2022 г., и что было на самом деле</h3>
+        <div class="tbl-wrap"><table id="t-2022"><thead><tr><th class="r">Через, мес.</th><th>Месяц</th><th class="r">Прогноз, м</th><th class="r">80%-й интервал</th><th class="r">Факт, м</th><th class="r">Ошибка, см</th><th>В интервале</th></tr></thead><tbody></tbody></table></div>
+        <p class="note">Выделен месяц первого пересечения.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stack-lg" aria-labelledby="h-c3">
+    <div class="stack">
+      <div class="eyebrow">Случай 3 · Волго-Каспийский канал · весна 2026</div>
+      <h2 id="h-c3">Затор 2026 г.: почему этот метод его не видит</h2>
+    </div>
+    <div class="two">
+      <div class="stack">
+        <p>В мае–июне 2026 г. осадка на канале упала с 4,5 до 3,2–3,7 м, 75 судов стояли почти месяц. Уровень моря в это время рос: с ноября 2025 по июль 2026 г. он поднялся на <b>44 см</b>, с <span class="mono">−29,50</span> до <span class="mono">−29,06</span> м. Это второй по величине подъём с 1993 г. (среднее — 29 см, больше было только в 2007 г.). То есть мощное половодье по спутниковому ряду видно, а обмеления в этот момент не было.</p>
+        <p>Порог −28,0 м для канала пройден ещё в 2014 г., и с тех пор тревога по нему не снимается. Значит, она ничего не говорит о конкретном сезоне: канал работал за счёт дноуглубления, и его отказ определяется заносимостью, а не уровнем моря.</p>
+        <p class="verdict miss">Причина затора — заиление после половодья. Чтобы ловить такие события, нужны сток Волги, мутность и промеры канала. Индикатор «уровень ниже исторического минимума + сильное половодье» выделяет 2026 г., но придуман после события и не проверен.</p>
+      </div>
+      <div class="panel">
+        <h3>Весенний подъём уровня, март → пик июня–июля</h3>
+        <p class="note">Подъём в см. Красным — годы, когда уровень в марте уже ниже исторического минимума.</p>
+        <div class="chart" id="ch-rise" role="img" aria-label="Весенний подъём уровня по годам"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="two" aria-label="Скорость падения и точность">
+    <div class="panel">
+      <h2>Падение ускоряется</h2>
+      <p class="note">Среднегодовой уровень, м БС. Цвет — период из таблицы: серый 1996–2005, жёлтый 2005–2019, красный 2019–2025.</p>
+      <div class="chart" id="ch-annual" role="img" aria-label="Среднегодовой уровень Каспия 1993–2025"></div>
+      <div class="tbl-wrap"><table id="t-rate"><thead><tr><th>Период</th><th class="r">Средний уровень в начале, м</th><th class="r">В конце, м</th><th class="r">Тренд, см/год</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="panel">
+      <h2>Точность прогноза</h2>
+      <p class="note">Средняя абсолютная ошибка по всем ретро-прогнозам 1998–2026, см. Прогноз «как год назад» — база для сравнения.</p>
+      <div class="tbl-wrap"><table id="t-skill"><thead><tr><th class="r">Горизонт, мес.</th><th class="r">Ансамбль</th><th class="r">SARIMA</th><th class="r">Тренд + сезон</th><th class="r">Как год назад</th></tr></thead><tbody></tbody></table></div>
+      <p class="note">SARIMA отдельно точнее ансамбля на всех горизонтах; тревоги выше посчитаны по ансамблю. 80%-й интервал накрыл <b id="cov">—</b> фактических значений (без адаптивной калибровки — <span id="cov0">—</span>).</p>
+    </div>
+  </section>
+
+  <section class="two" aria-label="Пороги и текущий прогноз">
+    <div class="panel">
+      <h2>Запас для любого порога</h2>
+      <p class="note">Месяцы непрерывной тревоги до первого выхода ниже порога и месяцы ложной тревоги перед ним.</p>
+      <div class="tbl-wrap"><table id="t-sweep"><thead><tr><th class="r">Порог, м</th><th>Тревога с</th><th>Пересечение</th><th class="r">Запас, мес.</th><th class="r">Ложная тревога, мес.</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="panel">
+      <h2>Прогноз от октября 2026 г.</h2>
+      <p class="note">Ансамбль, м БС. Сезонный минимум — в декабре–январе, максимум — в июле.</p>
+      <div class="tbl-wrap"><table id="t-now"><thead><tr><th>Месяц</th><th class="r">Прогноз, м</th><th class="r">80%-й интервал, м</th></tr></thead><tbody></tbody></table></div>
+      <p class="note">По прогнозу в январе 2028 г. уровень будет около −29,56 м, на 6 см ниже минимума ряда (ноябрь 2025 г.).</p>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-method">
+    <h2 id="h-method">Как получены цифры</h2>
+    <ol class="method">
+      <li>Ряд — NASA/USDA G-REALM, Caspian Sea (TOPEX/Poseidon, Jason-1/2/3, Sentinel-6A), октябрь 1992 — октябрь 2026, среднее за месяц.</li>
+      <li>Привязка к Балтийской системе: −29,21 м в апреле 2025 г. (Минводресурсов Казахстана). Проверка: 1995 г. по ряду <span class="mono" id="chk">—</span> м, в литературе около −26,66 м.</li>
+      <li>С января 1998 г. каждый месяц выпускался прогноз на 1–24 месяца тремя моделями (как год назад; тренд + сезон; SARIMA) и их ансамблем. Модель видела только данные до месяца выпуска.</li>
+      <li>Интервалы и вероятности — по ошибкам прошлых прогнозов, уже проверенным к месяцу выпуска, с адаптивной калибровкой ширины.</li>
+      <li>Тревога: вероятность выйти ниже порога в ближайшие 24 месяца ≥ 50%.</li>
+      <li>Порог −28,00 м для канала подобран под инцидент 2015 г.; для практики его нужно заменить отметкой дна по промерам Росморпорта. −29,01 м — внешняя отметка.</li>
+    </ol>
+  </section>
+
+  <footer>Данные: <a href="https://earth.gsfc.nasa.gov/gwm/lake/270" target="_blank" rel="noopener">NASA G-REALM, Caspian Sea</a> · инциденты: <a href="https://tass.ru/ekonomika/1883088" target="_blank" rel="noopener">ТАСС, 2015</a>, <a href="https://tass.ru/transport/2607356" target="_blank" rel="noopener">ТАСС, 2016</a>, <a href="https://astrakhan.aif.ru/incidents/chp/na-pavodke-zator-na-volgo-kaspiyskom-kanale-2026-75-sudov-zablokirovany" target="_blank" rel="noopener">АиФ Астрахань, 2026</a>, <a href="https://www.rogtecmagazine.com/lukoil-faces-logistics-challenge-in-kazakhstan-project-due-to-caspian-sea-shallowness" target="_blank" rel="noopener">ROGTEC (канал Каламкас-Хазар)</a> · код: github.com/kreuzovartem2206-arch/caspian-early-warning, ветка feature/caspian-early-warning.</footer>
+</main>
+
+<script id="data" type="application/json">__DATA__</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const ru = d3.formatLocale({decimal: ",", thousands: " ", grouping: [3], currency: ["", ""], minus: "−"});
+  const f2 = ru.format(".2f"), f1 = ru.format(".1f"), f0 = ru.format(",d"), fpct = ru.format(".1%"), fs = ru.format("+.0f");
+  const MON = ["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"];
+  const pm = d3.utcParse("%Y-%m");
+  const fm = (s) => { const d = s && pm(String(s).slice(0, 7)); return d ? `${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}` : "—"; };
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const R = (id) => D.results.find((r) => r.id === id);
+
+  // headline figures
+  document.getElementById("f1").firstChild.textContent = f0(R("vkmsk_supply").lead_to_incident_sustained);
+  document.getElementById("f2").firstChild.textContent = f0(R("historic_min").lead_months_sustained);
+  document.getElementById("f3").firstChild.textContent = f1(D.skill.find((s) => s[0] === 12)[1]);
+  const ann = D.annual;
+  const slope = (a, b) => { const s = ann.filter((r) => r[0] >= a && r[0] <= b); const xs = s.map((r) => r[0]), ys = s.map((r) => r[1]); const mx = d3.mean(xs), my = d3.mean(ys); return d3.sum(xs.map((x, i) => (x - mx) * (ys[i] - my))) / d3.sum(xs.map((x) => (x - mx) ** 2)) * 100; };
+  document.getElementById("f4").firstChild.textContent = f1(slope(2019, 2025));
+  document.getElementById("cov").textContent = fpct(D.coverage);
+  document.getElementById("cov0").textContent = fpct(D.coverage_static);
+  document.getElementById("chk").textContent = f2(D.datum.computed);
+
+  // forecast-vs-fact tables
+  const fanTable = (id, fan, marks) => {
+    const tb = document.querySelector(`#${id} tbody`);
+    fan.rows.forEach(([h, t, f, lo, hi, a]) => {
+      if (!(h <= 3 || h % 3 === 0 || marks.includes(t))) return;
+      const tr = document.createElement("tr"); if (marks.includes(t)) tr.className = "hl";
+      const inside = a != null && a >= lo && a <= hi;
+      const cells = [[f0(h), "r"], [fm(t), "nw"], [f2(f), "r m"], [`${f2(lo)} … ${f2(hi)}`, "r m"], [a == null ? "—" : f2(a), "r m"], [a == null ? "—" : fs((a - f) * 100), "r m"]];
+      cells.forEach(([v, c]) => { const td = document.createElement("td"); td.className = c; td.textContent = v; tr.appendChild(td); });
+      const td = document.createElement("td"); const p = document.createElement("span"); p.className = "pill " + (inside ? "ok" : "bad"); p.textContent = inside ? "да" : "нет"; td.appendChild(p); tr.appendChild(td);
+      tb.appendChild(tr);
+    });
+  };
+  fanTable("t-2013", D.fan2013, ["2014-12", "2015-04"]);
+  fanTable("t-2022", D.fan2022, ["2023-01"]);
+
+  // rate table
+  const at = (y) => (ann.find((r) => r[0] === y) || [])[1];
+  [[1996, 2005, "Стабилизация после пика 1995 г."], [2005, 2019, "Устойчивое падение"], [2019, 2025, "Ускорение"]].forEach(([a, b]) => {
+    const tr = document.createElement("tr");
+    [[`${a}–${b}`, ""], [f2(at(a)), "r m"], [f2(at(b)), "r m"], [f1(slope(a, b)), "r m"]].forEach(([v, c]) => { const td = document.createElement("td"); td.className = c; td.textContent = v; tr.appendChild(td); });
+    document.querySelector("#t-rate tbody").appendChild(tr);
+  });
+  // skill table
+  D.skill.filter((s) => [1, 3, 6, 12, 18, 24].includes(s[0])).forEach((s) => {
+    const tr = document.createElement("tr");
+    s.forEach((v, i) => { const td = document.createElement("td"); td.className = "r m"; td.textContent = i === 0 ? f0(v) : f1(v); tr.appendChild(td); });
+    document.querySelector("#t-skill tbody").appendChild(tr);
+  });
+  // sweep table
+  D.sweep.forEach((s) => {
+    const tr = document.createElement("tr");
+    if (s.level_bs === -28 || s.level_bs === -29) tr.className = "hl";
+    [[f2(s.level_bs), "r m"], [fm(s.sustained_alert_from), "nw"], [fm(s.first_crossing), "nw"], [s.lead_months_sustained == null ? "—" : f0(s.lead_months_sustained), "r m"], [f0(s.false_alarm_months_before_crossing), "r m"]].forEach(([v, c]) => { const td = document.createElement("td"); td.className = c; td.textContent = v; tr.appendChild(td); });
+    document.querySelector("#t-sweep tbody").appendChild(tr);
+  });
+  // now table
+  D.now.forEach(([t, f, lo, hi], i) => {
+    if (!(i % 3 === 0 || i === D.now.length - 1)) return;
+    const tr = document.createElement("tr");
+    [[fm(t), "nw"], [f2(f), "r m"], [`${f2(lo)} … ${f2(hi)}`, "r m"]].forEach(([v, c]) => { const td = document.createElement("td"); td.className = c; td.textContent = v; tr.appendChild(td); });
+    document.querySelector("#t-now tbody").appendChild(tr);
+  });
+
+  // ---- charts ----
+  const tipOf = (box) => { let t = box.querySelector(".tip"); if (!t) { t = document.createElement("div"); t.className = "tip"; box.appendChild(t); } return t; };
+  const showTip = (box, tip, x, y, head, lines) => {
+    tip.replaceChildren(); const h = document.createElement("div"); h.className = "h"; h.textContent = head; tip.appendChild(h);
+    lines.forEach((l) => { const d = document.createElement("div"); d.textContent = l; tip.appendChild(d); });
+    tip.style.opacity = 1; const bw = box.clientWidth, tw = tip.offsetWidth, th = tip.offsetHeight;
+    let left = x + 12; if (left + tw > bw) left = x - tw - 12; if (left < 0) left = 0;
+    let top = y - th - 10; if (top < 0) top = y + 14; tip.style.left = left + "px"; tip.style.top = top + "px";
+  };
+  const axisStyle = (g) => g.attr("font-size", null).attr("font-family", null).attr("class", "axis");
+
+  const level = D.level.map(([m, v]) => ({t: pm(m), v, m}));
+  const now = D.now.map(([t, f, lo, hi]) => ({t: pm(t), f, lo, hi}));
+
+  function drawLevel() {
+    const box = document.getElementById("ch-level"); box.querySelector("svg")?.remove();
+    const W = Math.max(320, box.clientWidth), H = W < 600 ? 300 : 380;
+    const svg = d3.select(box).append("svg").attr("viewBox", `0 0 ${W} ${H}`);
+    const narrow = W < 640;
+    const m = {t: 22, r: narrow ? 10 : 118, b: 26, l: 52};
+    const x = d3.scaleUtc([level[0].t, now[now.length - 1].t], [m.l, W - m.r]);
+    const y = d3.scaleLinear([-30.0, -26.3], [H - m.b, m.t]);
+    svg.append("g").attr("class", "grid").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(7).tickSize(-(W - m.l - m.r)).tickFormat(""));
+    svg.append("g").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(7).tickFormat(f1).tickSizeOuter(0)).call(axisStyle).call((g) => g.select(".domain").remove());
+    svg.append("g").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(narrow ? 5 : 10).tickFormat(d3.utcFormat("%Y")).tickSizeOuter(0)).call(axisStyle);
+    D.results.forEach((r) => {
+      const a = pm(r.sustained_alert_from), b = pm(r.first_crossing);
+      svg.append("rect").attr("x", x(a)).attr("width", x(b) - x(a)).attr("y", m.t).attr("height", H - m.b - m.t).attr("fill", css("--alert-soft"));
+      svg.append("text").attr("class", "lbl-ink").attr("x", (x(a) + x(b)) / 2).attr("y", m.t - 6).attr("text-anchor", "middle").text(`${r.lead_months_sustained} мес.`);
+      const yy = y(r.level_bs);
+      svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", yy).attr("y2", yy).attr("stroke", css("--ink-3")).attr("stroke-dasharray", "4 4");
+      const lab = `${f2(r.level_bs)} ${r.id === "vkmsk_supply" ? "канал" : "минимум 1977"}`;
+      if (narrow) svg.append("text").attr("class", "lbl").attr("x", W - m.r).attr("y", yy - 5).attr("text-anchor", "end").text(lab);
+      else svg.append("text").attr("class", "lbl").attr("x", W - m.r + 6).attr("y", yy + 4).text(lab);
+    });
+    const last = level[level.length - 1];
+    const band = [{t: last.t, lo: last.v, hi: last.v, f: last.v}, ...now];
+    svg.append("path").datum(band).attr("fill", css("--sea-soft")).attr("d", d3.area().x((d) => x(d.t)).y0((d) => y(d.lo)).y1((d) => y(d.hi)));
+    svg.append("path").datum(band).attr("fill", "none").attr("stroke", css("--sea")).attr("stroke-width", 2).attr("stroke-dasharray", "5 4").attr("d", d3.line().x((d) => x(d.t)).y((d) => y(d.f)));
+    svg.append("path").datum(level).attr("fill", "none").attr("stroke", css("--sea")).attr("stroke-width", 2).attr("stroke-linejoin", "round").attr("d", d3.line().x((d) => x(d.t)).y((d) => y(d.v)));
+    const inc = [["2015-04", "ТАСС: загрузка 50%"], ["2016-01", "загрузка 30%"], ["2026-05", "затор 2026"]];
+    inc.forEach(([mm, label], i) => {
+      const p = level.find((d) => d.m === mm); if (!p) return;
+      svg.append("circle").attr("cx", x(p.t)).attr("cy", y(p.v)).attr("r", 5).attr("fill", css("--bad")).attr("stroke", css("--panel")).attr("stroke-width", 2);
+      if (i !== 1) svg.append("text").attr("class", "lbl").attr("x", x(p.t) + (i === 2 ? -8 : 8)).attr("y", y(p.v) + (i === 0 ? -10 : 18)).attr("text-anchor", i === 2 ? "end" : "start").text(label);
+    });
+    const peak = level.reduce((a, b) => (b.v > a.v ? b : a)), low = level.reduce((a, b) => (b.v < a.v ? b : a));
+    svg.append("text").attr("class", "lbl").attr("x", x(peak.t) + 6).attr("y", y(peak.v) - 2).text(`пик ${f2(peak.v)}`);
+    svg.append("text").attr("class", "lbl").attr("x", x(low.t)).attr("y", y(low.v) + 16).attr("text-anchor", "middle").text(`мин. ${f2(low.v)}`);
+
+    const all = [...level.map((d) => ({t: d.t, v: d.v, k: 0})), ...now.map((d) => ({t: d.t, v: d.f, lo: d.lo, hi: d.hi, k: 1}))];
+    const tip = tipOf(box), rule = svg.append("line").attr("y1", m.t).attr("y2", H - m.b).attr("stroke", css("--ink-3")).attr("opacity", 0);
+    const dot = svg.append("circle").attr("r", 4).attr("fill", css("--sea")).attr("stroke", css("--panel")).attr("stroke-width", 2).attr("opacity", 0);
+    const bis = d3.bisector((d) => d.t).center;
+    svg.append("rect").attr("x", m.l).attr("y", m.t).attr("width", W - m.l - m.r).attr("height", H - m.t - m.b).attr("fill", "transparent")
+      .on("pointermove", (ev) => {
+        const [px] = d3.pointer(ev); const d = all[bis(all, x.invert(px))]; if (!d) return;
+        const sx = x(d.t) * box.clientWidth / W, sy = y(d.v) * box.clientWidth / W;
+        rule.attr("x1", x(d.t)).attr("x2", x(d.t)).attr("opacity", 1); dot.attr("cx", x(d.t)).attr("cy", y(d.v)).attr("opacity", 1);
+        showTip(box, tip, sx, sy, `${MON[d.t.getUTCMonth()]} ${d.t.getUTCFullYear()}`, d.k ? [`прогноз ${f2(d.v)} м`, `80%: ${f2(d.lo)} … ${f2(d.hi)}`] : [`${f2(d.v)} м БС`]);
+      })
+      .on("pointerleave", () => { rule.attr("opacity", 0); dot.attr("opacity", 0); tip.style.opacity = 0; });
+  }
+
+  function drawAnnual() {
+    const box = document.getElementById("ch-annual"); box.querySelector("svg")?.remove();
+    const rows = ann.filter((r) => r[0] >= 1993 && r[0] <= 2025);
+    const W = Math.max(300, box.clientWidth), H = 190, m = {t: 10, r: 8, b: 22, l: 46};
+    const svg = d3.select(box).append("svg").attr("viewBox", `0 0 ${W} ${H}`);
+    const x = d3.scaleBand(rows.map((r) => r[0]), [m.l, W - m.r]).padding(0.2);
+    const y = d3.scaleLinear([-29.4, -26.6], [H - m.b, m.t]);
+    svg.append("g").attr("class", "grid").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickSize(-(W - m.l - m.r)).tickFormat(""));
+    svg.append("g").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(f1)).call(axisStyle).call((g) => g.select(".domain").remove());
+    svg.append("g").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(rows.map((r) => r[0]).filter((v) => v % 5 === 0)).tickSizeOuter(0)).call(axisStyle);
+    const col = (yr) => (yr >= 2019 ? css("--bad") : yr >= 2005 ? css("--alert") : css("--muted-mark"));
+    svg.append("path").datum(rows).attr("fill", "none").attr("stroke", css("--ink-3")).attr("stroke-width", 1.5).attr("d", d3.line().x((r) => x(r[0]) + x.bandwidth() / 2).y((r) => y(r[1])));
+    svg.append("g").selectAll("circle").data(rows).join("circle").attr("cx", (r) => x(r[0]) + x.bandwidth() / 2).attr("cy", (r) => y(r[1])).attr("r", 4).attr("fill", (r) => col(r[0])).attr("stroke", css("--panel")).attr("stroke-width", 1.5);
+    const tip = tipOf(box);
+    svg.append("g").selectAll("rect").data(rows).join("rect").attr("x", (r) => x(r[0])).attr("width", x.step()).attr("y", m.t).attr("height", H - m.t - m.b).attr("fill", "transparent")
+      .on("pointermove", (ev, r) => { const s = box.clientWidth / W; showTip(box, tip, (x(r[0]) + x.bandwidth() / 2) * s, y(r[1]) * s, String(r[0]), [`${f2(r[1])} м БС`]); })
+      .on("pointerleave", () => { tip.style.opacity = 0; });
+  }
+
+  function drawRise() {
+    const box = document.getElementById("ch-rise"); box.querySelector("svg")?.remove();
+    const mar = new Map(level.filter((d) => d.m.endsWith("-03")).map((d) => [d.t.getUTCFullYear(), d.v]));
+    const rows = D.rise.filter((r) => r[0] >= 2000).map(([yr, rise, z]) => ({yr, cm: rise * 100, z, low: (mar.get(yr) ?? 0) < -29.01}));
+    const W = Math.max(300, box.clientWidth), H = 200, m = {t: 18, r: 8, b: 22, l: 36};
+    const svg = d3.select(box).append("svg").attr("viewBox", `0 0 ${W} ${H}`);
+    const x = d3.scaleBand(rows.map((r) => r.yr), [m.l, W - m.r]).padding(0.2);
+    const y = d3.scaleLinear([0, d3.max(rows, (r) => r.cm)], [H - m.b, m.t]).nice();
+    svg.append("g").attr("class", "grid").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickSize(-(W - m.l - m.r)).tickFormat(""));
+    svg.append("g").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(f0)).call(axisStyle).call((g) => g.select(".domain").remove());
+    svg.append("g").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(rows.map((r) => r.yr).filter((v) => (v % 5 === 0 && v !== 2025) || v === 2026)).tickSizeOuter(0)).call(axisStyle);
+    const mean = d3.mean(rows.filter((r) => r.yr < 2026), (r) => r.cm);
+    svg.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(mean)).attr("y2", y(mean)).attr("stroke", css("--ink-3")).attr("stroke-dasharray", "4 4");
+    svg.append("text").attr("class", "lbl").attr("x", m.l + 4).attr("y", y(mean) - 4).text(`среднее ${f0(mean)} см`);
+    svg.append("g").selectAll("rect").data(rows).join("rect").attr("x", (r) => x(r.yr)).attr("width", x.bandwidth()).attr("y", (r) => y(r.cm)).attr("height", (r) => y(0) - y(r.cm)).attr("rx", 2).attr("fill", (r) => (r.low ? css("--bad") : css("--muted-mark")));
+    const tip = tipOf(box);
+    svg.append("g").selectAll("rect").data(rows).join("rect").attr("x", (r) => x(r.yr)).attr("width", x.step()).attr("y", m.t).attr("height", H - m.t - m.b).attr("fill", "transparent")
+      .on("pointermove", (ev, r) => { const s = box.clientWidth / W; showTip(box, tip, (x(r.yr) + x.bandwidth() / 2) * s, y(r.cm) * s, String(r.yr), [`подъём ${f0(r.cm)} см`, `${r.z == null ? "" : ru.format("+.1f")(r.z) + " σ к прошлым годам"}`]); })
+      .on("pointerleave", () => { tip.style.opacity = 0; });
+  }
+
+  const drawAll = () => { drawLevel(); drawAnnual(); drawRise(); };
+  drawAll();
+  let rt; new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(drawAll, 120); }).observe(document.querySelector(".page"));
+  const mq = window.matchMedia("(prefers-color-scheme: dark)"); mq.addEventListener?.("change", drawAll);
+  new MutationObserver(drawAll).observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme"]});
+})();
+</script>
