@@ -35,6 +35,7 @@ def main():
                   for h in sk.index],
         "rise": [[int(k), v["rise_m"], v["z"]] for k, v in b["spring_rise"].items()],
         "coverage": b["coverage80"], "coverage_static": b["coverage80_static"], "datum": b["datum"],
+        "exposure": b["exposure"],
     }
     js = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     tpl = (ROOT / "report" / "template.html").read_text()

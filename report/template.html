@@ -195,6 +195,38 @@ footer { font-size: var(--step--1); color: var(--ink-3); border-top: 1px solid v
     </div>
   </section>
 
+  <section class="stack-lg" aria-labelledby="h-risk" id="risk">
+    <div class="stack">
+      <div class="eyebrow">Прогноз · объекты без аварий · от октября 2026 г.</div>
+      <h2 id="h-risk">Где обмеление ударит следующим</h2>
+      <p class="lead">Модель переводит прогноз уровня в глубину моря на каждом объекте. Судну с осадкой <span class="mono">4,5</span> м (проектная осадка Волго-Каспийского канала) с запасом под килем <span class="mono">0,5</span> м нужно не меньше <b>5,0 м</b>. На месторождении им. Грайфера и в мелкой части Хазара глубина меньше уже сейчас. На Филановского и Каламкас-море ниже 5 м она уходит при сильном сгоне уже сегодня, а в спокойную погоду — около 2030 г.</p>
+    </div>
+    <div class="panel">
+      <h3>Глубина на объекте: сейчас, осенью 2028 г. и в 2030 г. при уровне −30,2 м</h3>
+      <p class="note">По наименьшей опубликованной глубине участка. Усы — 10%-й нижний квантиль прогноза на 24 месяца. Красная зона — меньше 5,0 м; жёлтая — меньше 5,0 м при сильном сгоне (−1,17 м).</p>
+      <div class="legend">
+        <span><i class="sw dot" style="background:var(--sea)"></i>Октябрь 2026, факт</span>
+        <span><i class="sw dot" style="background:var(--panel);border:2px solid var(--sea)"></i>Минимум прогноза (октябрь 2028)</span>
+        <span><i class="sw dot" style="background:var(--bad);border-radius:2px"></i>2030 г. при −30,2 м (Минводресурсов РК)</span>
+      </div>
+      <div class="chart" id="ch-risk" role="img" aria-label="Глубина моря на объектах ЛУКОЙЛа: сейчас, прогноз на 2028 год и сценарий 2030 года"></div>
+    </div>
+    <div class="panel">
+      <h3>Риск по объектам</h3>
+      <div class="tbl-wrap"><table id="t-risk"><thead><tr>
+        <th>Объект</th><th class="r">Глубина по данным, м</th><th class="r">Сейчас</th><th class="r">Окт 2028 (10%)</th><th class="r">Сейчас при сгоне 1,17 м</th><th class="r">2030 при −30,2 м</th><th class="r">Год, когда &lt; 5 м<br>(темп 2019–25 / 2005–19)</th><th>Риск</th>
+      </tr></thead><tbody></tbody></table></div>
+      <p class="note">Глубины приведены к условному уровню −28,0 м БС; явно это указано только для месторождения им. Грайфера. Если глубину мерили при уровне около −27 м (2000–2005 гг.), реальная глубина сейчас на 1 м меньше. Сгоны — по станции М. Пешной (Ивкина и др., 2019): средний значимый 0,64 м, наибольший за 1996–2018 гг. 1,17 м. Годы после 24 месяцев — линейное продолжение тренда, а не модель.</p>
+    </div>
+    <ul class="facts">
+      <li><span class="when">Грайфер</span><span>Глубина по данным 5,0–5,4 м при −28 м; сейчас <b>3,7–4,1 м</b>, к осени 2028 г. 3,4–3,8 м (в 10% случаев до 3,1 м), при сильном сгоне 2,6–2,9 м. Месторождение уже работает ниже порога 5 м, значит обслуживается мелкосидящими судами; запас для них сокращается примерно на 20 см в год.</span></li>
+      <li><span class="when">Хазар</span><span>Наименьшая глубина 6 м даёт сейчас 4,7 м. Первая нефть запланирована на 2028–2029 гг., когда прогноз даёт 4,4 м. Платформы и снабжение придётся планировать под осадку меньше 4 м или с дноуглублением у объекта, а не только на подходном канале через Уральскую седловину.</span></li>
+      <li><span class="when">Филановского, Каламкас-море</span><span>При наименьшей глубине 7 м сейчас 5,7 м: в штиль хватает, при сильном сгоне (−1,17 м) остаётся 4,5 м. Что даже обычный значимый сгон (−0,64 м) опустит глубину ниже 5 м в ближайшие 2 года, модель оценивает в 95%. В спокойную погоду глубина уйдёт ниже 5 м около 2030 г. при нынешнем темпе и около 2035 г. при темпе 2005–2019 гг.</span></li>
+      <li><span class="when">Корчагина</span><span>9,7 м сейчас; ниже 5 м — около 2051 г. при нынешнем темпе. Риск обмеления у платформы низкий, но снабжение идёт через тот же канал и мелководье.</span></li>
+      <li><span class="when">Кувыкина, Хвалынское</span><span>13,7 и 23,7 м: в горизонте проектов обмеление у самих платформ не угрожает.</span></li>
+    </ul>
+  </section>
+
   <section class="two" aria-label="Скорость падения и точность">
     <div class="panel">
       <h2>Падение ускоряется</h2>
@@ -411,7 +443,56 @@ footer { font-size: var(--step--1); color: var(--ink-3); border-top: 1px solid v
       .on("pointerleave", () => { tip.style.opacity = 0; });
   }
 
-  const drawAll = () => { drawLevel(); drawAnnual(); drawRise(); };
+
+  // ---- risk for objects without incidents ----
+  const EX = D.exposure, need = EX.need_m, sdMax = EX.cfg.setdown_max_m;
+  const exMin = EX.rows.filter((r) => r.depth_basis === "min");
+  const yrTxt = (v) => (v == null ? "—" : v <= 2026.9 ? "уже" : v > 2100 ? "после 2100" : String(Math.floor(v)));
+  const riskOf = (r) => (r.depth_now_m < need || r.depth_fc_p10_m < need ? ["высокий", "bad"] : r.depth_now_m - sdMax < need ? ["повышенный", "warn"] : r.year_calm_r2019 != null && r.year_calm_r2019 < 2045 ? ["умеренный", "warn"] : ["низкий", "ok"]);
+  exMin.forEach((r) => {
+    const typ = EX.rows.find((q) => q.id === r.id && q.depth_basis === "typical");
+    const tr = document.createElement("tr");
+    const depthTxt = typ && typ.depth_ref_m !== r.depth_ref_m ? `${f1(r.depth_ref_m)}–${f1(typ.depth_ref_m)}` : f1(r.depth_ref_m);
+    const name = document.createElement("td"); const nb = document.createElement("div"); nb.textContent = r.object; const ns = document.createElement("div"); ns.className = "note"; ns.textContent = r.status; name.append(nb, ns); tr.appendChild(name);
+    const y1 = yrTxt(r.year_calm_r2019), y2 = yrTxt(r.year_calm_r2005);
+    const cells = [[depthTxt, "r m"], [f1(r.depth_now_m), "r m"], [`${f1(r.depth_fc_min_m)} (${f1(r.depth_fc_p10_m)})`, "r m"], [f1(r.depth_now_m - sdMax), "r m"], [f1(r.depth_2030_lo_m), "r m"], [y1 === y2 ? y1 : `${y1} / ${y2}`, "r m"]];
+    cells.forEach(([v, c]) => { const td = document.createElement("td"); td.className = c; td.textContent = v; tr.appendChild(td); });
+    const [label, cls] = riskOf(r); const td = document.createElement("td"); const p = document.createElement("span"); p.className = "pill " + cls; p.textContent = label; td.appendChild(p); tr.appendChild(td);
+    document.querySelector("#t-risk tbody").appendChild(tr);
+  });
+
+  function drawRisk() {
+    const box = document.getElementById("ch-risk"); box.querySelector("svg")?.remove();
+    const rows = exMin.filter((r) => r.depth_ref_m <= 16);
+    const W = Math.max(320, box.clientWidth), rh = 34, m = {t: 8, r: 16, b: 28, l: 118};
+    const H = m.t + m.b + rows.length * rh;
+    const svg = d3.select(box).append("svg").attr("viewBox", `0 0 ${W} ${H}`);
+    const x = d3.scaleLinear([0, 15], [m.l, W - m.r]);
+    const y = d3.scaleBand(rows.map((r) => r.id), [m.t, H - m.b]).padding(0.3);
+    svg.append("rect").attr("x", x(0)).attr("width", x(need) - x(0)).attr("y", m.t).attr("height", H - m.t - m.b).attr("fill", css("--bad")).attr("opacity", 0.08);
+    svg.append("rect").attr("x", x(need)).attr("width", x(need + sdMax) - x(need)).attr("y", m.t).attr("height", H - m.t - m.b).attr("fill", css("--alert-soft"));
+    svg.append("g").attr("class", "grid").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(W < 560 ? 4 : 8).tickSize(-(H - m.t - m.b)).tickFormat(""));
+    svg.append("g").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(W < 560 ? 4 : 8).tickFormat(f0).tickSizeOuter(0)).call(axisStyle);
+    svg.append("text").attr("class", "lbl").attr("x", W - m.r).attr("y", H - 2).attr("text-anchor", "end").text("глубина, м");
+    svg.append("line").attr("x1", x(need)).attr("x2", x(need)).attr("y1", m.t).attr("y2", H - m.b).attr("stroke", css("--bad")).attr("stroke-dasharray", "4 3");
+    const short = {grayfer: "Грайфер", khazar: "Хазар", kalamkas: "Каламкас-море", filanovsky: "Филановского", korchagin: "Корчагина", kuvykin: "Кувыкина"};
+    rows.forEach((r) => {
+      const cy = y(r.id) + y.bandwidth() / 2;
+      svg.append("text").attr("class", "lbl-ink").attr("x", m.l - 10).attr("y", cy + 4).attr("text-anchor", "end").text(short[r.id] || r.object);
+      svg.append("line").attr("x1", x(r.depth_2030_lo_m)).attr("x2", x(r.depth_now_m)).attr("y1", cy).attr("y2", cy).attr("stroke", css("--ink-3")).attr("stroke-width", 1.5);
+      svg.append("line").attr("x1", x(r.depth_fc_p10_m)).attr("x2", x(r.depth_fc_min_m)).attr("y1", cy - 6).attr("y2", cy - 6).attr("stroke", css("--sea")).attr("stroke-width", 2);
+      svg.append("rect").attr("x", x(r.depth_2030_lo_m) - 5).attr("y", cy - 5).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", css("--bad"));
+      svg.append("circle").attr("cx", x(r.depth_fc_min_m)).attr("cy", cy).attr("r", 5.5).attr("fill", css("--panel")).attr("stroke", css("--sea")).attr("stroke-width", 2);
+      svg.append("circle").attr("cx", x(r.depth_now_m)).attr("cy", cy).attr("r", 5.5).attr("fill", css("--sea")).attr("stroke", css("--panel")).attr("stroke-width", 1.5);
+      svg.append("text").attr("class", "lbl").attr("x", x(r.depth_now_m) + 9).attr("y", cy + 4).text(f1(r.depth_now_m));
+    });
+    const tip = tipOf(box);
+    svg.append("g").selectAll("rect").data(rows).join("rect").attr("x", 0).attr("width", W).attr("y", (r) => y(r.id) - y.step() * 0.15).attr("height", y.step()).attr("fill", "transparent")
+      .on("pointermove", (ev, r) => { const [px, py] = d3.pointer(ev, box); showTip(box, tip, px, py, r.object, [`сейчас ${f1(r.depth_now_m)} м`, `окт 2028: ${f1(r.depth_fc_min_m)} м (10%: ${f1(r.depth_fc_p10_m)})`, `2030 при −30,2 м: ${f1(r.depth_2030_lo_m)} м`]); })
+      .on("pointerleave", () => { tip.style.opacity = 0; });
+  }
+
+  const drawAll = () => { drawLevel(); drawAnnual(); drawRise(); drawRisk(); };
   drawAll();
   let rt; new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(drawAll, 120); }).observe(document.querySelector(".page"));
   const mq = window.matchMedia("(prefers-color-scheme: dark)"); mq.addEventListener?.("change", drawAll);

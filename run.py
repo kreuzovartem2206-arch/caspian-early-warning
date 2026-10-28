@@ -11,7 +11,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-from pipeline import alerts, backtest, config, ingest, models
+from pipeline import alerts, backtest, config, exposure, ingest, models
 
 
 def main():
@@ -64,6 +64,12 @@ def main():
                                        "lead_months_sustained", "baseline_lead_sustained",
                                        "false_alarm_months_before_crossing")})
     pd.DataFrame(sens).to_csv(config.OUT_DIR / "threshold_sensitivity.csv", index=False)
+
+    # forward-looking risk for objects without incidents
+    expo = exposure.assess(y, pool, ens)
+    expo.to_csv(config.OUT_DIR / "exposure_objects.csv", index=False)
+    print(expo[expo.depth_basis == "min"][["id", "depth_now_m", "depth_fc_min_m", "depth_fc_p10_m",
+                                            "p24_calm", "year_calm_r2019"]].to_string(index=False))
 
     rise = alerts.spring_rise(y)
     rise.to_csv(config.OUT_DIR / "spring_rise.csv")
@@ -119,6 +125,9 @@ def main():
         "coverage80": round(coverage, 3),
         "coverage80_static": round(coverage_static, 3),
         "sensitivity": sens,
+        "exposure": {"rows": json.loads(expo.to_json(orient="records", force_ascii=False)),
+                     "need_m": expo.attrs["need"], "level_now": round(expo.attrs["level_now"], 3),
+                     "cfg": {k: v for k, v in config.EXPOSURE.items() if k != "objects"}},
         "siltation_flag_years": [int(v) for v in silt.index[silt.flag]],
         "spring_rise": {int(k): {"rise_m": round(v.rise_m, 3),
                                  "z": None if pd.isna(v.z_vs_past) else round(v.z_vs_past, 2)}
