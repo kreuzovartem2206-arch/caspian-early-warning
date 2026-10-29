@@ -1,0 +1,448 @@
+<meta name="dash-one-writer">
+<style>
+.cs { display: flex; flex-direction: column; gap: var(--cds-gap-lg); font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+.cs-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
+.cs-lead { margin: var(--cds-gap-xs) 0 0; font-size: var(--cds-font-size-body); line-height: 1.55; max-width: 64rem; }
+.cs .cs-lead b, .cs .cs-num b { font-weight: 600; }
+.cs-num { font-variant-numeric: tabular-nums; }
+.cs-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.5rem), 1fr)); gap: var(--cds-gap-md); }
+.cs-kpi, .cs-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
+.cs-kpi { display: flex; flex-direction: column; gap: var(--cds-gap-xs); }
+.cs-kpi-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.cs-kpi-value { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; display: flex; align-items: baseline; gap: var(--cds-gap-xs); min-height: 2.1rem; }
+.cs-unit { font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.cs-kpi-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+.cs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: var(--cds-gap-md); }
+.cs-h { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+.cs-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: var(--cds-gap-xs) 0 var(--cds-gap-md); line-height: 1.45; max-width: 60rem; }
+.cs-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-bottom: var(--cds-gap-sm); }
+.cs-legend span { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); }
+.cs-sw { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+.cs-sw-box { height: 10px; opacity: .3; }
+.cs-sw-dash { height: 0; border-top: 2px dashed var(--cds-chart-reference); }
+.cs-sw-dot { width: 10px; height: 10px; border-radius: 50%; }
+.cs-sw-ring { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; }
+.cs-chart { position: relative; min-height: 260px; }
+.cs-chart-tall { min-height: 340px; }
+.cs-chart-obj { min-height: 300px; }
+.cs-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; opacity: 0; z-index: 2; font-variant-numeric: tabular-nums; }
+.cs-tip-h { color: var(--cds-text-secondary); margin-bottom: 2px; }
+.cs-axis text { fill: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.cs-axis line, .cs-axis path { stroke: var(--cds-chart-axis); }
+.cs-gridl line { stroke: var(--cds-chart-grid); }
+.cs-gridl path { display: none; }
+.cs-lbl { fill: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.cs-lbl-strong { fill: var(--color-fg); font-size: var(--cds-font-size-caption); font-weight: 500; }
+.cs-tbl-wrap { overflow-x: auto; }
+table.cs-tbl { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.cs-tbl th { text-align: left; font-weight: 500; color: var(--color-fg-muted); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: bottom; }
+.cs-tbl td { padding: var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+.cs-tbl .cs-r { text-align: right; white-space: nowrap; }
+.cs-pill { display: inline-block; padding: 0 var(--cds-pad-xs); border-radius: 999px; border: 1px solid currentColor; font-size: var(--cds-font-size-caption); white-space: nowrap; }
+.cs-pill-bad { color: var(--color-bad); }
+.cs-pill-warn { color: var(--color-warn); }
+.cs-pill-ok { color: var(--color-ok); }
+.cs-method { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.55; }
+.cs-method ol { margin: var(--cds-gap-xs) 0 0; padding-left: 1.2rem; display: grid; gap: var(--cds-gap-xs); }
+.cs-fail { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: inherit; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.cs-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+.cs [data-dash-source-state=empty] { color: transparent; }
+.cs [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+</style>
+
+<div class="cs">
+  <header id="top">
+    <h1 class="cs-title">Обмеление Каспия</h1>
+    <p class="cs-lead">В <b data-draw="lead-month" data-source="kpi" data-field="month_now">—</b> уровень моря — <b data-draw="lead-level" data-source="kpi" data-field="level_now">—</b> м БС, ниже минимума 1977 г. (<span data-draw="c-min1">—</span> м). С 2019 по 2025 г. он падал в среднем на <b data-draw="lead-rate" data-source="kpi" data-field="rate_2019_2025_cm">—</b> см в год; в 2026 г. среднее за январь–октябрь изменилось к прошлому году на <b data-draw="lead-ytd" data-source="kpi" data-field="ytd_change_cm">—</b> см. На <b data-draw="lead-risk" data-source="kpi" data-field="objects_at_risk">—</b> из <span data-draw="lead-total" data-source="kpi" data-field="objects_total">—</span> объектов ЛУКОЙЛа на Каспии глубина уже меньше рабочей или уходит ниже неё при сильном сгоне.</p>
+  </header>
+
+  <section class="cs-kpis" aria-label="Главные показатели">
+    <div class="cs-kpi">
+      <div class="cs-kpi-label">Уровень моря, <span data-draw="k-month" data-source="kpi" data-field="month_now">—</span></div>
+      <div class="cs-kpi-value"><span data-draw="k-level" data-source="kpi" data-field="level_now">—</span><span class="cs-unit">м БС</span></div>
+      <div class="cs-kpi-note">За 12 месяцев: <span data-draw="k-yoy" data-source="kpi" data-field="yoy_cm">—</span> см</div>
+    </div>
+    <div class="cs-kpi">
+      <div class="cs-kpi-label">Рекордный минимум ряда</div>
+      <div class="cs-kpi-value"><span data-draw="k-low" data-source="kpi" data-field="record_low">—</span><span class="cs-unit">м БС</span></div>
+      <div class="cs-kpi-note"><span data-draw="k-lowm" data-source="kpi" data-field="record_low_month">—</span>; минимум 1977 г. — <span data-draw="c-min2">—</span> м</div>
+    </div>
+    <div class="cs-kpi">
+      <div class="cs-kpi-label">Темп падения, 2019–2025</div>
+      <div class="cs-kpi-value"><span data-draw="k-rate" data-source="kpi" data-field="rate_2019_2025_cm">—</span><span class="cs-unit">см/год</span></div>
+      <div class="cs-kpi-note">В 2005–2019 гг.: <span data-draw="k-rate2" data-source="kpi" data-field="rate_2005_2019_cm">—</span> см/год</div>
+    </div>
+    <div class="cs-kpi">
+      <div class="cs-kpi-label">Прогноз на <span data-draw="k-fcm" data-source="kpi" data-field="fc12_month">—</span></div>
+      <div class="cs-kpi-value"><span data-draw="k-fc" data-source="kpi" data-field="fc12">—</span><span class="cs-unit">м БС</span></div>
+      <div class="cs-kpi-note">80%: <span data-draw="k-fclo" data-source="kpi" data-field="fc12_p10">—</span> … <span data-draw="k-fchi" data-source="kpi" data-field="fc12_p90">—</span> м</div>
+    </div>
+    <div class="cs-kpi">
+      <div class="cs-kpi-label">Объекты ЛУКОЙЛа в зоне риска</div>
+      <div class="cs-kpi-value"><span data-draw="k-risk" data-source="kpi" data-field="objects_at_risk">—</span><span class="cs-unit">из <span data-draw="k-total" data-source="kpi" data-field="objects_total">—</span></span></div>
+      <div class="cs-kpi-note">Глубина меньше рабочей уже сейчас: <span data-draw="k-below" data-source="kpi" data-field="objects_below">—</span></div>
+    </div>
+  </section>
+
+  <section class="cs-card" id="level">
+    <h2 class="cs-h">Уровень Каспия по месяцам и прогноз на два года</h2>
+    <p class="cs-note">Спутниковая альтиметрия, среднее за месяц, м Балтийской системы. Справа — прогноз модели от последнего месяца с 80%-м интервалом.</p>
+    <div class="cs-legend">
+      <span><i class="cs-sw" data-draw="sw-level"></i>Уровень</span>
+      <span><i class="cs-sw cs-sw-box" data-draw="sw-fc"></i>Прогноз, 80%</span>
+      <span><i class="cs-sw cs-sw-dash"></i>Минимум 1977 г., <span data-draw="c-min3">—</span> м</span>
+    </div>
+    <div class="cs-chart cs-chart-tall" data-draw="ch-level" data-source="level forecast" role="img" aria-label="Уровень Каспия по месяцам 1992–2026 и прогноз"></div>
+  </section>
+
+  <div class="cs-grid">
+    <section class="cs-card" id="annual">
+      <h2 class="cs-h">Изменение среднегодового уровня</h2>
+      <p class="cs-note">Разница среднегодового уровня с предыдущим годом, см. Для текущего года — январь–октябрь против того же периода прошлого года.</p>
+      <div class="cs-chart" data-draw="ch-annual" data-source="annual" role="img" aria-label="Изменение среднегодового уровня по годам"></div>
+    </section>
+    <section class="cs-card" id="season">
+      <h2 class="cs-h">Сезонный ход: последние пять лет</h2>
+      <p class="cs-note">Уровень по месяцам каждого года, м БС. Подъём весной и летом — половодье Волги, падение осенью — испарение.</p>
+      <div class="cs-legend" data-draw="lg-season" data-source="level"></div>
+      <div class="cs-chart" data-draw="ch-season" data-source="level" role="img" aria-label="Уровень по месяцам за последние пять лет"></div>
+    </section>
+  </div>
+
+  <section class="cs-card" id="objects">
+    <h2 class="cs-h">Глубина у объектов ЛУКОЙЛа</h2>
+    <p class="cs-note">По наименьшей опубликованной глубине участка, приведённой к условному уровню карт Каспия. Рабочая глубина <span data-draw="c-need">—</span> м — осадка <span data-draw="c-draft">—</span> м (проектная для Волго-Каспийского канала) плюс <span data-draw="c-ukc">—</span> м под килем. Жёлтая зона — запас, который съедает сильный сгон (<span data-draw="c-sd1">—</span> м).</p>
+    <div class="cs-legend">
+      <span><i class="cs-sw cs-sw-dot" data-draw="sw-now"></i>Сейчас</span>
+      <span><i class="cs-sw cs-sw-ring" data-draw="sw-2028"></i>Октябрь 2028, прогноз</span>
+      <span><i class="cs-sw" data-draw="sw-p10"></i>10%-й нижний вариант</span>
+    </div>
+    <div class="cs-chart cs-chart-obj" data-draw="ch-objects" data-source="objects" role="img" aria-label="Глубина у объектов сейчас и в октябре 2028 года"></div>
+    <div class="cs-tbl-wrap">
+      <table class="cs-tbl" data-source="objects" data-row-key="object">
+        <thead><tr>
+          <th data-field="object">Объект</th>
+          <th data-field="status">Статус</th>
+          <th class="cs-r" data-field="depth_published_m">Глубина по данным, м</th>
+          <th class="cs-r" data-field="depth_now_m">Сейчас, м</th>
+          <th class="cs-r" data-field="depth_strong_setdown_m">При сильном сгоне, м</th>
+          <th class="cs-r" data-field="depth_oct2028_m">Окт 2028, м</th>
+          <th class="cs-r" data-field="months_below_5m_since_2024">Месяцев ниже рабочей глубины с 2024 г.</th>
+          <th data-field="risk">Оценка</th>
+        </tr></thead>
+        <tbody data-draw="obj-rows" data-source="objects"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="cs-grid">
+    <section class="cs-card" id="stations">
+      <h2 class="cs-h">Уровень на постах Казгидромета, 2026</h2>
+      <p class="cs-note">Прогноз по данным постов (модель MIKE 21), Северный Каспий, м БС. Пост Кулалы ближе всего к Каламкас-море и Хазару: уровень там ниже среднего по морю, значит и глубины у этих месторождений меньше.</p>
+      <div class="cs-tbl-wrap">
+        <table class="cs-tbl" data-source="stations" data-row-key="station">
+          <thead><tr>
+            <th data-field="station">Пост</th>
+            <th class="cs-r" data-field="jul2026_mean_bs">16–21 июля, средний</th>
+            <th class="cs-r" data-field="aug2026_mean_bs">20–25 августа, средний</th>
+            <th class="cs-r" data-field="aug2026_min_bs">Август, наименьший</th>
+          </tr></thead>
+          <tbody data-draw="st-rows" data-source="stations"></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="cs-card cs-method" id="method">
+      <h2 class="cs-h">Откуда цифры</h2>
+      <ol>
+        <li>Уровень — NASA/USDA G-REALM, Caspian Sea (TOPEX/Poseidon, Jason, Sentinel-6A), среднее за месяц. К Балтийской системе привязан по отметке Минводресурсов Казахстана на апрель 2025 г.</li>
+        <li>Прогноз — ансамбль модели тренда с сезонностью и SARIMA, проверенный ретро-прогнозами с 1998 г.; точность и проверка — в отчёте «Каспий: ретро-прогноз уровня».</li>
+        <li>Глубины участков — из открытых источников (Neftegaz.RU, NS Energy, КазМунайГаз, PetroDigest, национальный доклад РФ) и приведены к условному уровню карт Каспия. Явно эта привязка указана только для месторождения им. Грайфера.</li>
+        <li>Сильный сгон — наибольший на посту Пешной за 1996–2018 гг. (Ивкина и др., 2019). Посты Казгидромета — бюллетени за июль и август 2026 г.</li>
+      </ol>
+    </section>
+  </div>
+</div>
+
+<script>
+// ---- calculations (readers see these in Sources) ----
+dash.calc('annual', {
+  title: 'Среднегодовой уровень и его изменение',
+  description: 'Среднее за год по месячному уровню и разница с прошлым годом, см; для неполного года — те же месяцы прошлого года.',
+  inputs: ['level'],
+  fn: (level) => {
+    const by = {};
+    level.forEach((r) => { const y = +String(r.month).slice(0, 4), m = +String(r.month).slice(5, 7); (by[y] = by[y] || {})[m] = Number(r.level_bs); });
+    const years = Object.keys(by).map(Number).sort((a, b) => a - b);
+    const mean = (o, ms) => ms.reduce((s, m) => s + o[m], 0) / ms.length;
+    const out = [];
+    years.forEach((y) => {
+      const ms = Object.keys(by[y]).map(Number);
+      const prev = by[y - 1];
+      if (!prev) return;
+      const common = ms.filter((m) => prev[m] != null);
+      if (common.length < 6) return;
+      out.push({year: y, months: ms.length, mean_bs: mean(by[y], ms), change_cm: (mean(by[y], common) - mean(prev, common)) * 100});
+    });
+    return out;
+  },
+});
+
+dash.calc('kpi', {
+  title: 'Главные показатели',
+  description: 'Последний уровень, изменения, рекордный минимум, темпы падения, прогноз на 12 месяцев и число объектов в зоне риска.',
+  inputs: ['level', 'forecast', 'objects', 'annual'],
+  fn: (level, forecast, objects, annual) => {
+    const L = level.map((r) => ({m: String(r.month), v: Number(r.level_bs)}));
+    const last = L[L.length - 1];
+    const yAgo = L.find((r) => r.m === `${+last.m.slice(0, 4) - 1}${last.m.slice(4)}`);
+    const low = L.reduce((a, b) => (b.v < a.v ? b : a));
+    const full = annual.filter((a) => a.months === 12);
+    const slope = (y0, y1) => {
+      const s = full.filter((a) => a.year >= y0 && a.year <= y1);
+      const mx = s.reduce((t, a) => t + a.year, 0) / s.length, my = s.reduce((t, a) => t + a.mean_bs, 0) / s.length;
+      return s.reduce((t, a) => t + (a.year - mx) * (a.mean_bs - my), 0) / s.reduce((t, a) => t + (a.year - mx) ** 2, 0) * 100;
+    };
+    const cur = annual[annual.length - 1];
+    const f12 = forecast[11];
+    const need = 4.5 + 0.5; // draft + under-keel clearance, m
+    const below = objects.filter((o) => Number(o.depth_now_m) < need).length;
+    const atRisk = objects.filter((o) => Number(o.depth_strong_setdown_m) < need).length;
+    return [{
+      month_now: last.m, level_now: last.v, yoy_cm: yAgo ? (last.v - yAgo.v) * 100 : null,
+      record_low: low.v, record_low_month: low.m,
+      rate_2019_2025_cm: slope(2019, 2025), rate_2005_2019_cm: slope(2005, 2019),
+      ytd_change_cm: cur.months < 12 ? cur.change_cm : null,
+      fc12_month: String(f12.month), fc12: Number(f12.forecast_bs), fc12_p10: Number(f12.p10_bs), fc12_p90: Number(f12.p90_bs),
+      objects_below: below, objects_at_risk: atRisk, objects_total: objects.length,
+    }];
+  },
+});
+
+// ---- drawings ----
+(() => {
+  const ru = d3.formatLocale({decimal: ',', thousands: ' ', grouping: [3], currency: ['', ''], minus: '−'});
+  const f2 = ru.format('.2f'), f1 = ru.format('.1f'), f0 = ru.format(',d'), fs1 = ru.format('+.1f'), fs0 = ru.format('+.0f');
+  const MON = ['январе', 'феврале', 'марте', 'апреле', 'мае', 'июне', 'июле', 'августе', 'сентябре', 'октябре', 'ноябре', 'декабре'];
+  const MS = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+  const pm = d3.utcParse('%Y-%m');
+  const mShort = (s) => { const d = pm(String(s).slice(0, 7)); return d ? `${MS[d.getUTCMonth()]} ${d.getUTCFullYear()}` : '—'; };
+  const mIn = (s) => { const d = pm(String(s).slice(0, 7)); return d ? `${MON[d.getUTCMonth()]} ${d.getUTCFullYear()} г.` : '—'; };
+  const HIST_MIN = -29.01, DRAFT = 4.5, UKC = 0.5, NEED = DRAFT + UKC, SETDOWN = 1.17;
+  const col = () => dash.colors;
+  const st = (...ids) => { const s = ids.map((i) => dash.data(i).status); return s.every((x) => x === 'ok') ? 'ok' : s.some((x) => ['error', 'connect', 'declined', 'missing'].includes(x)) ? 'error' : 'loading'; };
+  const axis = (g) => g.attr('font-size', null).attr('font-family', null).attr('class', 'cs-axis');
+  const fail = (el) => { const d = document.createElement('div'); d.className = 'cs-fail'; d.textContent = 'Failed to load'; el.replaceChildren(d); };
+  const tipShow = (box, x, y, head, lines) => {
+    let t = box.querySelector('.cs-tip'); if (!t) { t = document.createElement('div'); t.className = 'cs-tip'; box.appendChild(t); }
+    t.replaceChildren(); const h = document.createElement('div'); h.className = 'cs-tip-h'; h.textContent = head; t.appendChild(h);
+    lines.forEach((l) => { const d = document.createElement('div'); d.textContent = l; t.appendChild(d); });
+    t.style.opacity = 1; const bw = box.clientWidth, tw = t.offsetWidth, th = t.offsetHeight;
+    let left = x + 12; if (left + tw > bw) left = x - tw - 12; t.style.left = `${Math.max(0, left)}px`;
+    let top = y - th - 8; if (top < 0) top = y + 12; t.style.top = `${top}px`;
+  };
+  const tipHide = (box) => { const t = box.querySelector('.cs-tip'); if (t) t.style.opacity = 0; };
+
+  // text values
+  const K = () => (dash.data('kpi').status === 'ok' ? dash.data('kpi').data[0] : null);
+  const val = (name, f) => dash.draw(name, (el) => { const k = K(); const v = k ? f(k) : null; el.textContent = v == null || v === '' || (typeof v === 'number' && isNaN(v)) ? '—' : v; });
+  val('lead-month', (k) => mIn(k.month_now));
+  val('lead-level', (k) => f2(k.level_now));
+  val('lead-rate', (k) => f1(Math.abs(k.rate_2019_2025_cm)));
+  val('lead-ytd', (k) => (k.ytd_change_cm == null ? null : fs1(k.ytd_change_cm)));
+  val('lead-risk', (k) => f0(k.objects_at_risk));
+  val('lead-total', (k) => f0(k.objects_total));
+  val('k-month', (k) => mShort(k.month_now));
+  val('k-level', (k) => f2(k.level_now));
+  val('k-yoy', (k) => (k.yoy_cm == null ? null : fs1(k.yoy_cm)));
+  val('k-low', (k) => f2(k.record_low));
+  val('k-lowm', (k) => mShort(k.record_low_month));
+  val('k-rate', (k) => f1(k.rate_2019_2025_cm));
+  val('k-rate2', (k) => f1(k.rate_2005_2019_cm));
+  val('k-fcm', (k) => mShort(k.fc12_month));
+  val('k-fc', (k) => f2(k.fc12));
+  val('k-fclo', (k) => f2(k.fc12_p10));
+  val('k-fchi', (k) => f2(k.fc12_p90));
+  val('k-risk', (k) => f0(k.objects_at_risk));
+  val('k-total', (k) => f0(k.objects_total));
+  val('k-below', (k) => f0(k.objects_below));
+
+  // fixed references
+  ['c-min1', 'c-min2', 'c-min3'].forEach((n) => dash.draw(n, (el) => { el.textContent = f2(HIST_MIN); }));
+  dash.draw('c-need', (el) => { el.textContent = f1(NEED); });
+  dash.draw('c-draft', (el) => { el.textContent = f1(DRAFT); });
+  dash.draw('c-ukc', (el) => { el.textContent = f1(UKC); });
+  dash.draw('c-sd1', (el) => { el.textContent = f2(SETDOWN); });
+
+  // legend swatches
+  dash.draw('sw-level', (el) => { el.style.background = col()[0]; });
+  dash.draw('sw-fc', (el) => { el.style.background = col()[0]; });
+  dash.draw('sw-now', (el) => { el.style.background = col()[0]; });
+  dash.draw('sw-2028', (el) => { el.style.borderColor = col()[0]; });
+  dash.draw('sw-p10', (el) => { el.style.background = col()[0]; });
+
+  // level chart
+  dash.draw('ch-level', (box) => {
+    const s = st('level', 'forecast');
+    if (s === 'error') return fail(box);
+    box.replaceChildren(); if (s !== 'ok') return;
+    const L = dash.data('level').data.map((r) => ({t: pm(String(r.month).slice(0, 7)), v: Number(r.level_bs)})).filter((d) => d.t);
+    const F = dash.data('forecast').data.map((r) => ({t: pm(String(r.month).slice(0, 7)), f: Number(r.forecast_bs), lo: Number(r.p10_bs), hi: Number(r.p90_bs)})).filter((d) => d.t);
+    const c = col()[0];
+    const W = Math.max(300, box.clientWidth), H = 340, narrow = W < 560;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    const lo = Math.min(d3.min(L, (d) => d.v), d3.min(F, (d) => d.lo)), hi = d3.max(L, (d) => d.v);
+    const y = d3.scaleLinear([Math.floor((lo - 0.1) * 5) / 5, Math.ceil((hi + 0.1) * 5) / 5], [H - 26, 12]);
+    const probe = svg.append('text').attr('class', 'cs-lbl').text(f1(y.domain()[0])); const ml = Math.ceil(probe.node().getComputedTextLength()) + 12; probe.remove();
+    const m = {t: 12, r: narrow ? 8 : 70, b: 26, l: ml};
+    const x = d3.scaleUtc([L[0].t, F.length ? F[F.length - 1].t : L[L.length - 1].t], [m.l, W - m.r]);
+    svg.append('g').attr('class', 'cs-gridl').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(7).tickSize(-(W - m.l - m.r)).tickFormat(''));
+    svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(7).tickFormat(f1).tickSizeOuter(0)).call(axis).call((g) => g.select('.domain').remove());
+    svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(narrow ? 5 : 10).tickFormat(d3.utcFormat('%Y')).tickSizeOuter(0)).call(axis);
+    svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(HIST_MIN)).attr('y2', y(HIST_MIN)).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 4');
+    const last = L[L.length - 1];
+    if (F.length) {
+      const band = [{t: last.t, lo: last.v, hi: last.v, f: last.v}, ...F];
+      svg.append('path').datum(band).attr('fill', c).attr('opacity', 0.16).attr('d', d3.area().x((d) => x(d.t)).y0((d) => y(d.lo)).y1((d) => y(d.hi)));
+      svg.append('path').datum(band).attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2).attr('stroke-dasharray', '5 4').attr('d', d3.line().x((d) => x(d.t)).y((d) => y(d.f)));
+    }
+    svg.append('path').datum(L).attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('d', d3.line().x((d) => x(d.t)).y((d) => y(d.v)));
+    svg.append('circle').attr('cx', x(last.t)).attr('cy', y(last.v)).attr('r', 4).attr('fill', c);
+    if (!narrow) {
+      svg.append('text').attr('class', 'cs-lbl-strong').attr('x', W - m.r + 6).attr('y', y(F.length ? F[F.length - 1].f : last.v) + 4).text(f2(F.length ? F[F.length - 1].f : last.v));
+    }
+    const all = [...L.map((d) => ({...d, k: 0})), ...F.map((d) => ({t: d.t, v: d.f, lo: d.lo, hi: d.hi, k: 1}))];
+    const bis = d3.bisector((d) => d.t).center;
+    const rule = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', 'var(--cds-chart-axis)').attr('opacity', 0);
+    const dot = svg.append('circle').attr('r', 4).attr('fill', c).attr('stroke', 'var(--color-panel)').attr('stroke-width', 2).attr('opacity', 0);
+    svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent')
+      .on('pointermove', (ev) => {
+        const [px] = d3.pointer(ev); const d = all[bis(all, x.invert(px))]; if (!d) return; const k = box.clientWidth / W;
+        rule.attr('x1', x(d.t)).attr('x2', x(d.t)).attr('opacity', 1); dot.attr('cx', x(d.t)).attr('cy', y(d.v)).attr('opacity', 1);
+        tipShow(box, x(d.t) * k, y(d.v) * k, `${MS[d.t.getUTCMonth()]} ${d.t.getUTCFullYear()}`, d.k ? [`прогноз ${f2(d.v)} м`, `80%: ${f2(d.lo)} … ${f2(d.hi)} м`] : [`${f2(d.v)} м БС`]);
+      })
+      .on('pointerleave', () => { rule.attr('opacity', 0); dot.attr('opacity', 0); tipHide(box); });
+  });
+
+  // annual change bars
+  dash.draw('ch-annual', (box) => {
+    const s = st('annual');
+    if (s === 'error') return fail(box);
+    box.replaceChildren(); if (s !== 'ok') return;
+    const A = dash.data('annual').data.map((a) => ({year: a.year, ch: a.change_cm, part: a.months < 12, mean: a.mean_bs}));
+    const W = Math.max(300, box.clientWidth), H = 260;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    const ext = d3.extent(A, (a) => a.ch);
+    const y = d3.scaleLinear([Math.min(0, ext[0]), Math.max(0, ext[1])], [H - 24, 10]).nice();
+    const probe = svg.append('text').attr('class', 'cs-lbl').text(fs0(y.domain()[0])); const ml = Math.ceil(probe.node().getComputedTextLength()) + 12; probe.remove();
+    const m = {t: 10, r: 6, b: 24, l: ml};
+    const x = d3.scaleBand(A.map((a) => a.year), [m.l, W - m.r]).padding(0.2);
+    svg.append('g').attr('class', 'cs-gridl').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W - m.l - m.r)).tickFormat(''));
+    svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(fs0)).call(axis).call((g) => g.select('.domain').remove());
+    const step = Math.max(1, Math.ceil(A.length / Math.floor((W - m.l) / 40)));
+    svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(A.map((a) => a.year).filter((v, i, arr) => (arr.length - 1 - i) % step === 0)).tickSizeOuter(0)).call(axis);
+    svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', 'var(--cds-chart-axis)');
+    svg.append('g').selectAll('rect').data(A).join('rect').attr('x', (a) => x(a.year)).attr('width', x.bandwidth())
+      .attr('y', (a) => Math.min(y(0), y(a.ch))).attr('height', (a) => Math.max(1, Math.abs(y(a.ch) - y(0)))).attr('rx', 2)
+      .attr('fill', (a) => (a.ch < 0 ? col()[0] : 'var(--cds-chart-muted)')).attr('opacity', (a) => (a.part ? 0.55 : 1));
+    svg.append('g').selectAll('rect').data(A).join('rect').attr('x', (a) => x(a.year) - (x.step() - x.bandwidth()) / 2).attr('width', x.step()).attr('y', m.t).attr('height', H - m.t - m.b).attr('fill', 'transparent')
+      .on('pointermove', (ev, a) => { const k = box.clientWidth / W; tipShow(box, (x(a.year) + x.bandwidth() / 2) * k, y(a.ch) * k, `${a.year}${a.part ? ', янв–' + MS[a.months - 1] : ''}`, [`изменение ${fs1(a.ch)} см`, `средний уровень ${f2(a.mean)} м`]); })
+      .on('pointerleave', () => tipHide(box));
+  });
+
+  // seasonal comparison
+  const seasonYears = () => {
+    const L = dash.data('level').data; const ys = [...new Set(L.map((r) => +String(r.month).slice(0, 4)))].sort((a, b) => a - b);
+    return ys.slice(-5);
+  };
+  dash.draw('lg-season', (el) => {
+    el.replaceChildren(); if (st('level') !== 'ok') return;
+    const ys = seasonYears();
+    ys.forEach((yr, i) => { const s = document.createElement('span'); const sw = document.createElement('i'); sw.className = 'cs-sw'; sw.style.background = i === ys.length - 1 ? col()[0] : col()[(i % 6) + 2]; s.append(sw, String(yr)); el.appendChild(s); });
+  });
+  dash.draw('ch-season', (box) => {
+    const s = st('level');
+    if (s === 'error') return fail(box);
+    box.replaceChildren(); if (s !== 'ok') return;
+    const ys = seasonYears();
+    const L = dash.data('level').data.map((r) => ({yr: +String(r.month).slice(0, 4), mo: +String(r.month).slice(5, 7), v: Number(r.level_bs)})).filter((d) => ys.includes(d.yr));
+    const W = Math.max(300, box.clientWidth), H = 260;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    const y = d3.scaleLinear([d3.min(L, (d) => d.v) - 0.05, d3.max(L, (d) => d.v) + 0.05], [H - 24, 10]).nice();
+    const probe = svg.append('text').attr('class', 'cs-lbl').text(f1(y.domain()[0])); const ml = Math.ceil(probe.node().getComputedTextLength()) + 12; probe.remove();
+    const m = {t: 10, r: 40, b: 24, l: ml};
+    const x = d3.scalePoint(d3.range(1, 13), [m.l, W - m.r]);
+    svg.append('g').attr('class', 'cs-gridl').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(W - m.l - m.r)).tickFormat(''));
+    svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(f1)).call(axis).call((g) => g.select('.domain').remove());
+    svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(W < 420 ? [1, 4, 7, 10] : d3.range(1, 13)).tickFormat((d) => MS[d - 1]).tickSizeOuter(0)).call(axis);
+    ys.forEach((yr, i) => {
+      const pts = L.filter((d) => d.yr === yr).sort((a, b) => a.mo - b.mo);
+      const color = i === ys.length - 1 ? col()[0] : col()[(i % 6) + 2];
+      svg.append('path').datum(pts).attr('fill', 'none').attr('stroke', color).attr('stroke-width', i === ys.length - 1 ? 2.5 : 1.5).attr('opacity', i === ys.length - 1 ? 1 : 0.75).attr('stroke-linejoin', 'round').attr('d', d3.line().x((d) => x(d.mo)).y((d) => y(d.v)));
+      const e = pts[pts.length - 1]; if (e) svg.append('text').attr('class', i === ys.length - 1 ? 'cs-lbl-strong' : 'cs-lbl').attr('x', x(e.mo) + 6).attr('y', y(e.v) + 4).text(String(yr));
+    });
+    const rule = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', 'var(--cds-chart-axis)').attr('opacity', 0);
+    svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent')
+      .on('pointermove', (ev) => {
+        const [px] = d3.pointer(ev); const mo = d3.range(1, 13).reduce((a, b) => (Math.abs(x(b) - px) < Math.abs(x(a) - px) ? b : a)); const k = box.clientWidth / W;
+        rule.attr('x1', x(mo)).attr('x2', x(mo)).attr('opacity', 1);
+        tipShow(box, x(mo) * k, 20, MS[mo - 1], ys.map((yr) => { const p = L.find((d) => d.yr === yr && d.mo === mo); return `${yr}: ${p ? f2(p.v) + ' м' : '—'}`; }));
+      })
+      .on('pointerleave', () => { rule.attr('opacity', 0); tipHide(box); });
+  });
+
+  // objects chart
+  const short = (s) => String(s).replace('Месторождение им. ', '').replace(/\s*\(.*\)/, '');
+  dash.draw('ch-objects', (box) => {
+    const s = st('objects');
+    if (s === 'error') return fail(box);
+    box.replaceChildren(); if (s !== 'ok') return;
+    const O = dash.data('objects').data.map((o) => ({name: short(o.object), full: o.object, now: Number(o.depth_now_m), f: Number(o.depth_oct2028_m), p10: Number(o.depth_oct2028_p10_m), sd: Number(o.depth_strong_setdown_m)})).filter((o) => o.now <= 16);
+    const c = col()[0];
+    const W = Math.max(300, box.clientWidth), rh = 36;
+    const svg = d3.select(box).append('svg').attr('width', '100%');
+    const probeW = d3.max(O, (o) => { const t = svg.append('text').attr('class', 'cs-lbl-strong').text(o.name); const w = t.node().getComputedTextLength(); t.remove(); return w; });
+    const m = {t: 6, r: 34, b: 28, l: Math.ceil(probeW) + 14};
+    const H = m.t + m.b + O.length * rh; svg.attr('viewBox', `0 0 ${W} ${H}`);
+    const x = d3.scaleLinear([0, Math.ceil(d3.max(O, (o) => o.now) + 1)], [m.l, W - m.r]);
+    const y = d3.scaleBand(O.map((o) => o.name), [m.t, H - m.b]).padding(0.3);
+    svg.append('rect').attr('x', x(0)).attr('width', x(NEED) - x(0)).attr('y', m.t).attr('height', H - m.t - m.b).attr('fill', 'var(--cds-chart-status-critical)').attr('opacity', 0.08);
+    svg.append('rect').attr('x', x(NEED)).attr('width', x(NEED + SETDOWN) - x(NEED)).attr('y', m.t).attr('height', H - m.t - m.b).attr('fill', 'var(--color-warn)').attr('opacity', 0.12);
+    svg.append('g').attr('class', 'cs-gridl').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(W < 520 ? 4 : 8).tickSize(-(H - m.t - m.b)).tickFormat(''));
+    svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(W < 520 ? 4 : 8).tickFormat(f0).tickSizeOuter(0)).call(axis);
+    svg.append('text').attr('class', 'cs-lbl').attr('x', W - m.r).attr('y', H - 2).attr('text-anchor', 'end').text('глубина, м');
+    svg.append('line').attr('x1', x(NEED)).attr('x2', x(NEED)).attr('y1', m.t).attr('y2', H - m.b).attr('stroke', 'var(--cds-chart-status-critical)').attr('stroke-dasharray', '4 3');
+    O.forEach((o) => {
+      const cy = y(o.name) + y.bandwidth() / 2;
+      svg.append('text').attr('class', 'cs-lbl-strong').attr('x', m.l - 10).attr('y', cy + 4).attr('text-anchor', 'end').text(o.name);
+      svg.append('line').attr('x1', x(o.p10)).attr('x2', x(o.now)).attr('y1', cy).attr('y2', cy).attr('stroke', c).attr('stroke-width', 2).attr('opacity', 0.5);
+      svg.append('circle').attr('cx', x(o.f)).attr('cy', cy).attr('r', 5).attr('fill', 'var(--color-panel)').attr('stroke', c).attr('stroke-width', 2);
+      svg.append('circle').attr('cx', x(o.now)).attr('cy', cy).attr('r', 5.5).attr('fill', o.now < NEED ? 'var(--cds-chart-status-critical)' : c);
+      svg.append('text').attr('class', 'cs-lbl').attr('x', x(o.now) + 9).attr('y', cy + 4).text(f1(o.now));
+    });
+    svg.append('g').selectAll('rect').data(O).join('rect').attr('x', 0).attr('width', W).attr('y', (o) => y(o.name) - y.step() * 0.15).attr('height', y.step()).attr('fill', 'transparent')
+      .on('pointermove', (ev, o) => { const [px, py] = d3.pointer(ev, box); tipShow(box, px, py, o.full, [`сейчас ${f1(o.now)} м`, `при сильном сгоне ${f1(o.sd)} м`, `окт 2028: ${f1(o.f)} м (10%: ${f1(o.p10)} м)`]); })
+      .on('pointerleave', () => tipHide(box));
+  });
+
+  // tables
+  const pillCls = (r) => (String(r).startsWith('уже') ? 'cs-pill cs-pill-bad' : String(r).startsWith('ниже') ? 'cs-pill cs-pill-warn' : 'cs-pill cs-pill-ok');
+  dash.draw('obj-rows', (tb) => {
+    tb.replaceChildren(); if (st('objects') !== 'ok') return;
+    dash.data('objects').data.forEach((o) => {
+      const tr = document.createElement('tr');
+      const cells = [[o.object, ''], [o.status, ''], [o.depth_published_m, 'cs-r'], [f1(Number(o.depth_now_m)), 'cs-r'], [f1(Number(o.depth_strong_setdown_m)), 'cs-r'], [f1(Number(o.depth_oct2028_m)), 'cs-r'], [`${o.months_below_5m_since_2024} из ${o.months_total}`, 'cs-r']];
+      cells.forEach(([v, cl]) => { const td = document.createElement('td'); if (cl) td.className = cl; td.textContent = v; tr.appendChild(td); });
+      const td = document.createElement('td'); const p = document.createElement('span'); p.className = pillCls(o.risk); p.textContent = o.risk; td.appendChild(p); tr.appendChild(td);
+      tb.appendChild(tr);
+    });
+  });
+  dash.draw('st-rows', (tb) => {
+    tb.replaceChildren(); if (st('stations') !== 'ok') return;
+    dash.data('stations').data.forEach((r) => {
+      const tr = document.createElement('tr');
+      [[r.station, ''], [f2(Number(r.jul2026_mean_bs)), 'cs-r'], [f2(Number(r.aug2026_mean_bs)), 'cs-r'], [f2(Number(r.aug2026_min_bs)), 'cs-r']].forEach(([v, cl]) => { const td = document.createElement('td'); if (cl) td.className = cl; td.textContent = v; tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+  });
+})();
+</script>
