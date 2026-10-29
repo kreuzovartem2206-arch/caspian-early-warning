@@ -135,6 +135,30 @@ table.cs-tbl { width: 100%; border-collapse: collapse; font-size: var(--cds-font
     </div>
   </section>
 
+
+  <section class="cs-card" id="outlook">
+    <h2 class="cs-h">Прогноз на 30 лет: уровень до 2056 г.</h2>
+    <p class="cs-note">Среднегодовой уровень, м БС; осенне-зимний минимум ниже среднегодового. Полоса — стохастическая модель годовых изменений, обученная на 1997–2025 гг. (от 10-го до 90-го процентиля), пунктир — её медиана. Прямые — сценарии с постоянным темпом: наблюдённые темпы и климатические прогнозы CMIP6 (Samant &amp; Prange, 2023). Прямые не учитывают, что меньшее море меньше испаряет, поэтому быстрые сценарии после 2040 г. — скорее верхняя граница падения.</p>
+    <p class="cs-lead cs-num">К 2056 г. медиана стохастической модели — <b data-draw="lt-p50" data-source="longterm">—</b> м БС (от <span data-draw="lt-p10" data-source="longterm">—</span> до <span data-draw="lt-p90" data-source="longterm">—</span> м), сценарии дают от <span data-draw="lt-smax" data-source="longterm">—</span> до <span data-draw="lt-smin" data-source="longterm">—</span> м.</p>
+    <div class="cs-legend" data-draw="lg-outlook" data-source="longterm"></div>
+    <div class="cs-chart cs-chart-tall" data-draw="ch-outlook" data-source="longterm lt_objects" role="img" aria-label="Уровень Каспия до 2056 года по сценариям"></div>
+    <div class="cs-tbl-wrap">
+      <table class="cs-tbl" data-source="lt_objects" data-row-key="object">
+        <thead><tr>
+          <th data-field="object">Месторождение</th>
+          <th class="cs-r" data-field="depth_now_m">Сейчас, м</th>
+          <th class="cs-r" data-field="p_below_need_2036">Вероятность глубины меньше рабочей к 2036 г.</th>
+          <th class="cs-r" data-field="p_below_need_2046">к 2046 г.</th>
+          <th class="cs-r" data-field="p_below_need_2056">к 2056 г.</th>
+          <th class="cs-r" data-field="depth_p50_2056">Глубина в 2056 г., медиана, м</th>
+          <th class="cs-r" data-field="year_need_ssp245">Меньше рабочей: SSP2-4.5 / темп 2019–2025</th>
+          <th class="cs-r" data-field="year_dry_ssp585">Участок осыхает: SSP5-8.5 / темп 2019–2025</th>
+        </tr></thead>
+        <tbody data-draw="lt-rows" data-source="lt_objects"></tbody>
+      </table>
+    </div>
+  </section>
+
   <div class="cs-grid">
     <section class="cs-card" id="stations">
       <h2 class="cs-h">Уровень на постах Казгидромета, 2026</h2>
@@ -422,6 +446,96 @@ dash.calc('kpi', {
     svg.append('g').selectAll('rect').data(O).join('rect').attr('x', 0).attr('width', W).attr('y', (o) => y(o.name) - y.step() * 0.15).attr('height', y.step()).attr('fill', 'transparent')
       .on('pointermove', (ev, o) => { const [px, py] = d3.pointer(ev, box); tipShow(box, px, py, o.full, [`сейчас ${f1(o.now)} м`, `при сильном сгоне ${f1(o.sd)} м`, `окт 2028: ${f1(o.f)} м (10%: ${f1(o.p10)} м)`]); })
       .on('pointerleave', () => tipHide(box));
+  });
+
+
+  // ---- 30-year outlook ----
+  const SCEN = [
+    ['slow', 'Замедление: −2 м к 2100 г. (ИО РАН)'],
+    ['r2005', 'Темп 2005–2019 гг.'],
+    ['ssp245', 'CMIP6 SSP2-4.5'],
+    ['ssp585', 'CMIP6 SSP5-8.5'],
+    ['r2019', 'Темп 2019–2025 гг.'],
+  ];
+  const LT = () => (dash.data('longterm').status === 'ok' ? dash.data('longterm').data.map((r) => { const o = {year: Number(r.year)}; Object.keys(r).forEach((k) => { if (k !== 'year') o[k] = r[k] === '' || r[k] == null ? null : Number(r[k]); }); return o; }) : null);
+  const ltLast = () => { const d = LT(); return d ? d[d.length - 1] : null; };
+  dash.draw('lt-p50', (el) => { const r = ltLast(); el.textContent = r ? f2(r.stoch_p50) : '—'; });
+  dash.draw('lt-p10', (el) => { const r = ltLast(); el.textContent = r ? f2(r.stoch_p10) : '—'; });
+  dash.draw('lt-p90', (el) => { const r = ltLast(); el.textContent = r ? f2(r.stoch_p90) : '—'; });
+  dash.draw('lt-smax', (el) => { const r = ltLast(); el.textContent = r ? f2(d3.max(SCEN, ([k]) => r[k])) : '—'; });
+  dash.draw('lt-smin', (el) => { const r = ltLast(); el.textContent = r ? f2(d3.min(SCEN, ([k]) => r[k])) : '—'; });
+  const scColor = (i) => col()[(i + 1) % col().length];
+  dash.draw('lg-outlook', (el) => {
+    el.replaceChildren(); if (st('longterm') !== 'ok') return;
+    const add = (bg, label, cls) => { const s = document.createElement('span'); const sw = document.createElement('i'); sw.className = 'cs-sw' + (cls ? ' ' + cls : ''); sw.style.background = bg; s.append(sw, label); el.appendChild(s); };
+    add('var(--color-fg)', 'Факт, среднегодовой');
+    add(col()[0], 'Стохастическая модель, 10–90%', 'cs-sw-box');
+    SCEN.forEach(([, label], i) => add(scColor(i), label));
+  });
+  dash.draw('ch-outlook', (box) => {
+    const s = st('longterm', 'lt_objects');
+    if (s === 'error') return fail(box);
+    box.replaceChildren(); if (s !== 'ok') return;
+    const D = LT();
+    const obs = D.filter((r) => r.observed != null);
+    const fut = D.filter((r) => r.stoch_p50 != null);
+    const lastObs = obs[obs.length - 1];
+    const objs = dash.data('lt_objects').data;
+    const fil = objs.find((o) => String(o.object).includes('Филановского'));
+    const gr = objs.find((o) => String(o.object).includes('Грайфера'));
+    const refs = [];
+    if (fil) refs.push([Number(fil.level_need_bs), 'Филановского и Каламкас-море: глубина меньше рабочей']);
+    if (gr) refs.push([Number(gr.level_dry_bs), 'Грайфер: участок осыхает']);
+    const W = Math.max(300, box.clientWidth), H = 360, narrow = W < 600;
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    const lo = d3.min(fut, (r) => Math.min(r.stoch_p10, ...SCEN.map(([k]) => r[k])));
+    const y = d3.scaleLinear([Math.floor(lo * 2) / 2 - 0.2, Math.ceil(d3.max(obs, (r) => r.observed) * 2) / 2 + 0.2], [H - 26, 12]);
+    const probe = svg.append('text').attr('class', 'cs-lbl').text(f1(y.domain()[0])); const ml = Math.ceil(probe.node().getComputedTextLength()) + 12; probe.remove();
+    const m = {t: 12, r: narrow ? 8 : 64, b: 26, l: ml};
+    const x = d3.scaleLinear([obs[0].year, fut[fut.length - 1].year], [m.l, W - m.r]);
+    svg.append('g').attr('class', 'cs-gridl').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(8).tickSize(-(W - m.l - m.r)).tickFormat(''));
+    svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(8).tickFormat(f1).tickSizeOuter(0)).call(axis).call((g) => g.select('.domain').remove());
+    svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(narrow ? 5 : 10).tickFormat(d3.format('d')).tickSizeOuter(0)).call(axis);
+    refs.forEach(([lv, label]) => {
+      if (lv < y.domain()[0] || lv > y.domain()[1]) return;
+      svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(lv)).attr('y2', y(lv)).attr('stroke', 'var(--cds-chart-status-critical)').attr('stroke-dasharray', '4 4');
+      svg.append('text').attr('class', 'cs-lbl').attr('x', m.l + 6).attr('y', y(lv) - 5).text(`${label}, ${f1(lv)} м`);
+    });
+    const start = {year: lastObs.year, v: lastObs.observed};
+    const band = [{year: start.year, a: start.v, b: start.v}, ...fut.map((r) => ({year: r.year, a: r.stoch_p10, b: r.stoch_p90}))];
+    svg.append('path').datum(band).attr('fill', col()[0]).attr('opacity', 0.16).attr('d', d3.area().x((r) => x(r.year)).y0((r) => y(r.a)).y1((r) => y(r.b)));
+    svg.append('path').datum([{year: start.year, v: start.v}, ...fut.map((r) => ({year: r.year, v: r.stoch_p50}))]).attr('fill', 'none').attr('stroke', col()[0]).attr('stroke-width', 2).attr('stroke-dasharray', '6 4').attr('d', d3.line().x((r) => x(r.year)).y((r) => y(r.v)));
+    SCEN.forEach(([k], i) => {
+      svg.append('path').datum([{year: start.year, v: start.v}, ...fut.map((r) => ({year: r.year, v: r[k]}))]).attr('fill', 'none').attr('stroke', scColor(i)).attr('stroke-width', 1.75).attr('d', d3.line().x((r) => x(r.year)).y((r) => y(r.v)));
+    });
+    svg.append('path').datum(obs).attr('fill', 'none').attr('stroke', 'var(--color-fg)').attr('stroke-width', 2).attr('stroke-linejoin', 'round').attr('d', d3.line().x((r) => x(r.year)).y((r) => y(r.observed)));
+    if (!narrow) {
+      const endL = fut[fut.length - 1];
+      const labs = [[endL.stoch_p50, 'медиана', col()[0]], ...SCEN.map(([k], i) => [endL[k], '', scColor(i)])].sort((a, b) => b[0] - a[0]);
+      let lastY = -Infinity;
+      labs.forEach(([v, , c]) => { let yy = y(v) + 4; if (yy - lastY < 13) yy = lastY + 13; lastY = yy; svg.append('text').attr('class', 'cs-lbl-strong').attr('x', W - m.r + 6).attr('y', yy).attr('fill', c).text(f1(v)); });
+    }
+    const rule = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', 'var(--cds-chart-axis)').attr('opacity', 0);
+    svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent')
+      .on('pointermove', (ev) => {
+        const [px] = d3.pointer(ev); const yr = Math.round(x.invert(px)); const r = D.find((d) => d.year === yr); if (!r) return; const k = box.clientWidth / W;
+        rule.attr('x1', x(yr)).attr('x2', x(yr)).attr('opacity', 1);
+        const lines = r.observed != null ? [`факт ${f2(r.observed)} м`] : [`модель: ${f2(r.stoch_p50)} м (${f2(r.stoch_p10)} … ${f2(r.stoch_p90)})`, ...SCEN.map(([kk, label]) => `${label}: ${f2(r[kk])} м`)];
+        tipShow(box, x(yr) * k, 20, String(yr), lines);
+      })
+      .on('pointerleave', () => { rule.attr('opacity', 0); tipHide(box); });
+  });
+  const yrTxt = (v) => { const n = Number(v); if (v === '' || v == null || isNaN(n)) return '—'; if (n < 2027) return 'уже'; if (n > 2100) return 'после 2100'; return String(Math.floor(n)); };
+  const pct = ru.format('.0%');
+  dash.draw('lt-rows', (tb) => {
+    tb.replaceChildren(); if (st('lt_objects') !== 'ok') return;
+    dash.data('lt_objects').data.forEach((o) => {
+      const tr = document.createElement('tr');
+      const a = yrTxt(o.year_need_ssp245), b = yrTxt(o.year_need_r2019), c = yrTxt(o.year_dry_ssp585), d = yrTxt(o.year_dry_r2019);
+      [[o.object, ''], [f1(Number(o.depth_now_m)), 'cs-r'], [pct(Number(o.p_below_need_2036)), 'cs-r'], [pct(Number(o.p_below_need_2046)), 'cs-r'], [pct(Number(o.p_below_need_2056)), 'cs-r'], [f1(Number(o.depth_p50_2056)), 'cs-r'], [a === b ? a : `${a} / ${b}`, 'cs-r'], [c === d ? c : `${c} / ${d}`, 'cs-r']]
+        .forEach(([v, cl]) => { const td = document.createElement('td'); if (cl) td.className = cl; td.textContent = v; tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
   });
 
   // tables
