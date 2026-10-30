@@ -16,7 +16,12 @@ Long-term paths, on the ANNUAL MEAN level (autumn-winter minimum is ~0.15 m lowe
 3. CESM    Nandini-Weiss et al. 2020 (Int. J. Climatol. 40, 2717), CESM1.2.2 with the
            Caspian water balance: ~9 m (RCP4.5) and ~18 m (RCP8.5) by the end of the century,
            spread here evenly over 2006-2100 (the RCP period).
-Straight lines ignore the area feedback (a smaller sea evaporates less), so beyond
+"Live" lines: each scenario trend gets its own realisation of interannual variability with the
+statistics of the observed annual changes (AR(1), same phi and sigma as our model), pinned to
+zero at 2028 and at 2056 so the scenario's start and end stay exactly as published. For our
+model the live line is the Monte Carlo path closest to the median (one plausible future).
+Object thresholds and probabilities are still computed from the trends / all 20,000 paths.
+Straight trends ignore the area feedback (a smaller sea evaporates less), so beyond
 ~2040 the fast scenarios are upper bounds of the decline rather than central estimates.
 """
 import numpy as np
@@ -72,6 +77,17 @@ def stochastic(start_level, start_sd, start_change, mu, se_mu, phi, sigma, years
     return out
 
 
+def live_noise(phi, sigma, n, seed):
+    """Interannual wiggle with observed AR(1) statistics, zero at both ends (bridge)."""
+    rng = np.random.default_rng(seed)
+    x, dev = 0.0, np.empty(n)
+    for k in range(n):
+        x = phi * x + rng.normal(0, sigma)
+        dev[k] = x
+    dev = np.cumsum(dev)
+    return dev - dev[-1] * np.arange(1, n + 1) / n
+
+
 def forecast_years(fc: pd.DataFrame):
     """Two forecast 'years' Nov-Oct from the 24-month monthly forecast."""
     rows = []
@@ -99,15 +115,21 @@ def run(y: pd.Series, exposure_rows: list, fc_now: pd.DataFrame):
     for s in SCENARIOS:
         s["rate"] = -s["total_m"] / (s["span"][1] - s["span"][0])
 
+    live = {s["id"]: live_noise(phi, sigma, n, SEED + 7 * (k + 1)) for k, s in enumerate(SCENARIOS)}
+    med = np.quantile(paths, 0.5, axis=1)
+    rep = paths[:, np.argmin(((paths - med[:, None]) ** 2).sum(axis=0))]
     rows = [{"year": f["year"], "fc_p10": f["fc_p10"], "fc_p50": f["fc_p50"], "fc_p90": f["fc_p90"]} for f in fy]
     rows[-1].update({"stoch_p10": fy[-1]["fc_p10"], "stoch_p50": start_level, "stoch_p90": fy[-1]["fc_p90"],
-                     **{s["id"]: start_level for s in SCENARIOS}})
+                     **{s["id"]: start_level for s in SCENARIOS}, **{s["id"] + "_live": start_level for s in SCENARIOS},
+                     "stoch_live": start_level})
     for i, yr in enumerate(years):
         r = {"year": int(yr),
              "stoch_p10": float(np.quantile(paths[i], 0.10)), "stoch_p50": float(np.quantile(paths[i], 0.50)),
              "stoch_p90": float(np.quantile(paths[i], 0.90))}
         for s in SCENARIOS:
             r[s["id"]] = start_level + s["rate"] * (yr - start_year)
+            r[s["id"] + "_live"] = r[s["id"]] + float(live[s["id"]][i])
+        r["stoch_live"] = float(rep[i])
         rows.append(r)
     levels = pd.DataFrame(rows)
     hist = pd.DataFrame({"year": ann.index.astype(int), "observed": ann.to_numpy()})

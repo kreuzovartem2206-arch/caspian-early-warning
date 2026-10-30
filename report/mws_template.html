@@ -163,7 +163,8 @@ footer a, .method a { color: var(--cool); }
       <div class="legend">
         <span><i class="sw" style="background:var(--ink)"></i>Наблюдения, среднее за год</span>
         <span><i class="sw box" style="background:var(--cool-soft)"></i>Стохастическая модель, 2 года, 80%</span>
-        <span><i class="sw" style="background:var(--cool)"></i><i class="sw box" style="background:var(--cool-faint);margin-left:-4px"></i>Наша модель до 2056 г., медиана и 80%</span>
+        <span><i class="sw" style="background:var(--cool)"></i>Наша модель: один из 20 000 сценариев, близкий к медиане</span>
+        <span><i class="sw dash" style="border-top-color:var(--cool)"></i><i class="sw box" style="background:var(--cool-faint);margin-left:-4px"></i>Её медиана и 80%</span>
       </div>
       <div class="legend" id="lg-lt"></div>
       <div class="chart" id="ch-lt" role="img" aria-label="Уровень Каспия до 2056 года по разным моделям"></div>
@@ -393,8 +394,8 @@ footer a, .method a { color: var(--cool); }
       sp.appendChild(i); sp.appendChild(document.createTextNode(s.label)); lg.appendChild(sp); });
     const sp = document.createElement('span'); const i = document.createElement('i'); i.className = 'sw dash'; sp.appendChild(i); sp.appendChild(document.createTextNode('Пороги глубины у месторождений')); lg.appendChild(sp);
     const lo = d3.min(SC, (s) => ltEnd[s.id]), hi = d3.max(SC, (s) => ltEnd[s.id]);
-    set('lt-note', `Первые два года (ноябрь 2026 — октябрь 2028) — тот же стохастический прогноз, что и выше. Дальше все линии стартуют от его среднего за последний год (${f2(ltStart.stoch_p50)} м). Наша модель — ${f0(20000)} случайных сценариев по статистике годовых изменений уровня 1997–2025 гг. (средний темп ${f1(LT.meta.mu_cm)} см/год). К ${ltEnd.year} г. её медиана — ${f2(ltEnd.stoch_p50)} м (80%: ${f2(ltEnd.stoch_p10)} … ${f2(ltEnd.stoch_p90)}), внешние модели дают от ${f2(hi)} до ${f2(lo)} м. Уровень — среднегодовой; осенью и зимой он примерно на 0,15 м ниже.`);
-    set('lt-foot', 'CMIP6 — суммарное падение за 2020–2100 гг. по лучшим моделям у Samant & Prange (2023): тренд моделей плюс наблюдённый тренд 1996–2021 гг. Для SSP1-2.6 и SSP2-4.5 их итог почти совпадает (−7,9 и −8 м): до 2100 г. сценарии выбросов расходятся слабо, а межмодельный разброс широкий (2–15 м для SSP2-4.5). CESM — модель Бременского университета с водным балансом Каспия (Nandini-Weiss et al., 2020), 9 и 18 м к концу века, разнесены равномерно на 2006–2100 гг. Прямые линии не учитывают, что меньшее море меньше испаряет, поэтому после 2040 г. быстрые сценарии — скорее верхняя граница падения. «—» — до 2056 г. порог не достигается; «суша» — уровень ниже дна.');
+    set('lt-note', `Первые два года (ноябрь 2026 — октябрь 2028) — тот же стохастический прогноз, что и выше. Дальше все линии стартуют от его среднего за последний год (${f2(ltStart.stoch_p50)} м). Наша модель — ${f0(20000)} случайных сценариев по статистике годовых изменений уровня 1997–2025 гг. (средний темп ${f1(LT.meta.mu_cm)} см/год). К ${ltEnd.year} г. её медиана — ${f2(ltEnd.stoch_p50)} м (80%: ${f2(ltEnd.stoch_p10)} … ${f2(ltEnd.stoch_p90)}), внешние модели дают от ${f2(hi)} до ${f2(lo)} м. Линии показаны «живыми»: к тренду каждого источника добавлены колебания год к году с той же силой и инерцией, что в наблюдениях 1997–2025 гг. (по отдельной случайной реализации на линию), при этом старт и итог к ${ltEnd.year} г. совпадают с источником. Конкретные подъёмы и провалы — иллюстрация, а не прогноз по годам. Уровень — среднегодовой; осенью и зимой он примерно на 0,15 м ниже.`);
+    set('lt-foot', 'Годы и глубины в таблице считаются по трендам и по всем 20 000 сценариям нашей модели, а не по одной «живой» линии. CMIP6 — суммарное падение за 2020–2100 гг. по лучшим моделям у Samant & Prange (2023): тренд моделей плюс наблюдённый тренд 1996–2021 гг. Для SSP1-2.6 и SSP2-4.5 их итог почти совпадает (−7,9 и −8 м): до 2100 г. сценарии выбросов расходятся слабо, а межмодельный разброс широкий (2–15 м для SSP2-4.5). CESM — модель Бременского университета с водным балансом Каспия (Nandini-Weiss et al., 2020), 9 и 18 м к концу века, разнесены равномерно на 2006–2100 гг. Прямые линии не учитывают, что меньшее море меньше испаряет, поэтому после 2040 г. быстрые сценарии — скорее верхняя граница падения. «—» — до 2056 г. порог не достигается; «суша» — уровень ниже дна.');
     const dep = (v) => (v <= 0 ? 'суша' : f1(v));
     const yr = (o, k) => { const v = o[`year_need_${k}`]; return v == null ? '—' : v <= LT.meta.start_year ? 'уже' : String(v); };
     LT.objects.forEach((o) => {
@@ -437,8 +438,10 @@ footer a, .method a { color: var(--cool); }
     // 2-year stochastic
     svg.append('path').datum(fcm).attr('fill', css('--cool-soft')).attr('d', d3.area().x((d) => x(d.x)).y0((d) => y(d.lo)).y1((d) => y(d.hi)));
     svg.append('path').datum(fcm).attr('fill', 'none').attr('stroke', css('--cool')).attr('stroke-width', 1.5).attr('stroke-dasharray', '4 3').attr('d', d3.line().x((d) => x(d.x)).y((d) => y(d.f)));
-    SC.forEach((s) => svg.append('path').datum(lt).attr('fill', 'none').attr('stroke', css(SCSTYLE[s.id][0])).attr('stroke-width', 1.75).attr('stroke-dasharray', SCSTYLE[s.id][1] || null).attr('d', d3.line().x((d) => x(d.x)).y((d) => y(d[s.id]))));
-    svg.append('path').datum(lt).attr('fill', 'none').attr('stroke', css('--cool')).attr('stroke-width', 2.5).attr('d', d3.line().x((d) => x(d.x)).y((d) => y(d.stoch_p50)));
+    const curve = d3.curveMonotoneX;
+    SC.forEach((s) => svg.append('path').datum(lt).attr('fill', 'none').attr('stroke', css(SCSTYLE[s.id][0])).attr('stroke-width', 1.75).attr('stroke-linejoin', 'round').attr('stroke-dasharray', SCSTYLE[s.id][1] || null).attr('d', d3.line().curve(curve).x((d) => x(d.x)).y((d) => y(d[s.id + '_live']))));
+    svg.append('path').datum(lt).attr('fill', 'none').attr('stroke', css('--cool')).attr('stroke-width', 1).attr('stroke-dasharray', '3 3').attr('d', d3.line().x((d) => x(d.x)).y((d) => y(d.stoch_p50)));
+    svg.append('path').datum(lt).attr('fill', 'none').attr('stroke', css('--cool')).attr('stroke-width', 2.5).attr('stroke-linejoin', 'round').attr('d', d3.line().curve(curve).x((d) => x(d.x)).y((d) => y(d.stoch_live)));
     svg.append('path').datum(tail).attr('fill', 'none').attr('stroke', css('--ink-3')).attr('stroke-width', 1).attr('d', d3.line().x((d) => x(d.x)).y((d) => y(d.v)));
     svg.append('path').datum(obs).attr('fill', 'none').attr('stroke', css('--ink')).attr('stroke-width', 2.5).attr('stroke-linejoin', 'round').attr('d', d3.line().x((d) => x(d.x)).y((d) => y(d.v)));
     // end labels, dodged
@@ -452,7 +455,7 @@ footer a, .method a { color: var(--cool); }
     // hover by year
     const pts = [...obs.map((d) => ({x: d.x, yr: Math.floor(d.x), k: 'obs', v: d.v})),
       ...F.filter((d) => d.m.endsWith('-04') || d.m.endsWith('-10')).map((d) => ({x: dec(d.t), k: 'fc', v: d.f, d})),
-      ...lt.filter((r) => r.year > ltStart.year).map((r) => ({x: r.x, yr: r.year, k: 'lt', v: r.stoch_p50, r}))];
+      ...lt.filter((r) => r.year > ltStart.year).map((r) => ({x: r.x, yr: r.year, k: 'lt', v: r.stoch_live, r}))];
     const bis = d3.bisector((d) => d.x).center;
     const rule = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', css('--ink-3')).attr('opacity', 0);
     svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent')
@@ -460,7 +463,7 @@ footer a, .method a { color: var(--cool); }
         let head, lines;
         if (p.k === 'obs') { head = `${p.yr}, наблюдения`; lines = [`среднее за год ${f2(p.v)} м`]; }
         else if (p.k === 'fc') { head = `${mS(p.d.m)}, стохастический прогноз`; lines = [`${f2(p.d.f)} м`, `80%: ${f2(p.d.lo)} … ${f2(p.d.hi)} м`]; }
-        else { head = `${p.yr}, среднее за год`; lines = [`наша модель ${f2(p.r.stoch_p50)} (80%: ${f2(p.r.stoch_p10)} … ${f2(p.r.stoch_p90)})`, ...SC.map((s) => `${SCSHORT[s.id]}: ${f2(p.r[s.id])}`)]; }
+        else { head = `${p.yr}, среднее за год`; lines = [`наша модель: сценарий ${f2(p.r.stoch_live)}, медиана ${f2(p.r.stoch_p50)} (80%: ${f2(p.r.stoch_p10)} … ${f2(p.r.stoch_p90)})`, ...SC.map((s) => `${SCSHORT[s.id]}: ${f2(p.r[s.id + '_live'])} (тренд ${f2(p.r[s.id])})`)]; }
         tipShow(box, x(p.x) * k, y(p.v) * k, head, lines); })
       .on('pointerleave', () => { rule.attr('opacity', 0); tipHide(box); });
   }
