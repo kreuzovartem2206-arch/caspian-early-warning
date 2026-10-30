@@ -13,7 +13,8 @@ Long-term paths, on the ANNUAL MEAN level (autumn-winter minimum is ~0.15 m lowe
 2. CMIP6   Samant & Prange 2023 (Commun. Earth Environ. 4, 357): total decline 2020-2100
            = climate-driven trend of best-fit models + observed 1996-2021 trend (~4.3 m):
            SSP1-2.6 ~7.9 m (3.65 + 4.3), SSP2-4.5 ~8 m, SSP5-8.5 ~14 m.
-3. CESM    Nandini-Weiss et al. 2020 (Int. J. Climatol. 40, 2717), CESM1.2.2 with the
+3. IO RAS  slower decline, -2 m by 2100 (lower IO RAS estimate, Kostianoy et al.).
+4. CESM    Nandini-Weiss et al. 2020 (Int. J. Climatol. 40, 2717), CESM1.2.2 with the
            Caspian water balance: ~9 m (RCP4.5) and ~18 m (RCP8.5) by the end of the century,
            spread here evenly over 2006-2100 (the RCP period).
 "Live" lines: each scenario trend gets its own realisation of interannual variability with the
@@ -36,6 +37,8 @@ SEED = 20261029
 Z80 = 2.5631  # width of a central 80% normal interval in sigmas
 
 SCENARIOS = [
+    {"id": "iors", "group": "ИО РАН", "label": "ИО РАН: −2 м к 2100 г. (нижняя оценка)", "total_m": 2.0, "span": (2026, 2100),
+     "source": "Институт океанологии РАН (Костяной и др.), нижняя оценка падения"},
     {"id": "ssp126", "group": "CMIP6", "label": "CMIP6 SSP1-2.6: −7,9 м за 2020–2100 гг.", "total_m": 7.9, "span": (2020, 2100),
      "source": "Samant & Prange 2023: тренд моделей 3,65 м + наблюдённый тренд ~4,3 м"},
     {"id": "ssp245", "group": "CMIP6", "label": "CMIP6 SSP2-4.5: −8 м за 2020–2100 гг.", "total_m": 8.0, "span": (2020, 2100),

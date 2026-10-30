@@ -65,7 +65,7 @@ python report/build.py   # страница report/caspian_report.html с вст
 ## 30-year outlook (to 2056)
 
 `pipeline/longterm.py`: years 1-2 come from the monthly stochastic ensemble forecast; from 2028 on,
-our AR(1) model on annual-mean changes (20,000 paths), CMIP6 SSP1-2.6 / SSP2-4.5 / SSP5-8.5
+our AR(1) model on annual-mean changes (20,000 paths), the IO RAS lower estimate (-2 m by 2100), CMIP6 SSP1-2.6 / SSP2-4.5 / SSP5-8.5
 (Samant & Prange 2023, Commun. Earth Environ.) and CESM RCP4.5 / RCP8.5 (Nandini-Weiss et al. 2020,
 Int. J. Climatol.). All paths start from the 2028 forecast. The standalone MWS page is built with
 `python report/build_mws.py` -> `report/caspian_shallowing_mws.html`.
