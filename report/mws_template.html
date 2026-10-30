@@ -21,6 +21,7 @@
   --line: #e2e5eb;
   --cool: #0070e5;
   --cool-soft: rgba(0, 112, 229, 0.14);
+  --cool-faint: rgba(0, 112, 229, 0.07);
   --amber: #f95721;
   --amber-soft: rgba(249, 87, 33, 0.12);
   --ok: #26cd58;
@@ -34,7 +35,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --ink: #fafafa; --ink-2: #b5bcc4; --ink-3: #8d969f; --ground: #121314; --module: #1d2023; --line: #2c3036;
-    --cool: #45b6fc; --cool-soft: rgba(69, 182, 252, 0.18); --graphite: #000000; color-scheme: dark;
+    --cool: #45b6fc; --cool-soft: rgba(69, 182, 252, 0.18); --cool-faint: rgba(69, 182, 252, 0.08); --graphite: #000000; color-scheme: dark;
   }
 }
 * { box-sizing: border-box; }
@@ -88,6 +89,7 @@ td .sub { font-size: 12px; color: var(--ink-3); }
 .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; white-space: nowrap; }
 .pill.bad { background: var(--red); color: #fff; }
 .pill.warn { background: var(--amber-soft); color: var(--amber); }
+td.bad-t { color: var(--red); font-weight: 600; }
 .pill.ok { background: var(--line); color: var(--ink-2); }
 .method ol { margin: 0; padding-left: 1.2rem; display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); }
 footer { font-size: 12px; color: var(--ink-3); }
@@ -155,6 +157,25 @@ footer a, .method a { color: var(--cool); }
       <p class="note">Глубина известна для 7 из примерно 15 месторождений ЛУКОЙЛа на Каспии. Не рассчитаны: «170 км», Центральное, Западно- и Северо-Ракушечное, Хазри, им. Маганова, Ауэзов; Шах-Дениз (Азербайджан) — глубоководный и вне риска обмеления.</p>
     </section>
 
+    <section class="module" aria-labelledby="h-lt">
+      <h2 id="h-lt">Прогноз на 30 лет: до 2056 года</h2>
+      <p class="note" id="lt-note">—</p>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--ink)"></i>Наблюдения, среднее за год</span>
+        <span><i class="sw box" style="background:var(--cool-soft)"></i>Стохастическая модель, 2 года, 80%</span>
+        <span><i class="sw" style="background:var(--cool)"></i><i class="sw box" style="background:var(--cool-faint);margin-left:-4px"></i>Наша модель до 2056 г., медиана и 80%</span>
+      </div>
+      <div class="legend" id="lg-lt"></div>
+      <div class="chart" id="ch-lt" role="img" aria-label="Уровень Каспия до 2056 года по разным моделям"></div>
+      <div class="tbl-wrap"><table id="t-lt"><thead><tr>
+        <th>Месторождение</th><th class="r">Глубина в 2028 г., м</th>
+        <th class="r">Наша модель:<br>глубина 2056 г., м</th><th class="r">Наша модель:<br>вероятность &lt; 5 м<br>к 2036 / 2056 г.</th>
+        <th class="r">Глубина &lt; 5 м с года:<br>наша · SSP2-4.5 · SSP5-8.5 · CESM 8.5</th>
+        <th class="r">Глубина 2056 г., м:<br>SSP1-2.6 · SSP5-8.5 · CESM 8.5</th>
+      </tr></thead><tbody></tbody></table></div>
+      <p class="note" id="lt-foot">—</p>
+    </section>
+
     <section class="grid two">
       <div class="module">
         <h2>Посты Казгидромета, 2026</h2>
@@ -167,6 +188,7 @@ footer a, .method a { color: var(--cool); }
           <li>Уровень — NASA/USDA G-REALM, Caspian Sea (TOPEX/Poseidon, Jason, Sentinel-6A), среднее за месяц; привязка к Балтийской системе по отметке Минводресурсов Казахстана (апрель 2025 г.).</li>
           <li>Прогноз — ансамбль модели тренда с сезонностью и SARIMA, проверенный ретро-прогнозами с 1998 г.</li>
           <li>Глубины — Neftegaz.RU, NS Energy, КазМунайГаз, PetroDigest, национальный доклад РФ; приведены к условному уровню карт Каспия (−28,0 м БС). Явно эта привязка указана только для месторождения им. Грайфера.</li>
+          <li>Прогноз на 30 лет — первые два года из того же стохастического ансамбля; дальше: наша модель AR(1) на годовых изменениях уровня 1997–2025 гг. (20 000 сценариев), тренды CMIP6 из <a href="https://www.nature.com/articles/s43247-023-01017-8">Samant &amp; Prange, 2023</a> и модель CESM из <a href="https://doi.org/10.1002/joc.6362">Nandini-Weiss et al., 2020</a>. Все линии стартуют от прогноза на 2028 г.</li>
           <li>Рабочая глубина — проектная осадка Волго-Каспийского канала плюс запас под килем; сильный сгон — наибольший на посту Пешной за 1996–2018 гг. (Ивкина и др., 2019).</li>
         </ol>
       </div>
@@ -358,7 +380,92 @@ footer a, .method a { color: var(--cool); }
       .on('pointerleave', () => tipHide(box));
   }
 
-  const drawAll = () => { drawLevel(); drawAnnual(); drawSeason(); drawObjects(); };
+  // ---- 30-year outlook ----
+  const LT = D.lt, LV = LT.levels, SC = LT.scen;
+  const SCSTYLE = {ssp126: ['--ink-2', ''], ssp245: ['--amber', ''], ssp585: ['--red', ''], cesm45: ['--amber', '6 4'], cesm85: ['--red', '6 4']};
+  const SCSHORT = {ssp126: 'SSP1-2.6', ssp245: 'SSP2-4.5', ssp585: 'SSP5-8.5', cesm45: 'CESM RCP4.5', cesm85: 'CESM RCP8.5'};
+  const ltEnd = LV[LV.length - 1], ltStart = LV.find((r) => r.stoch_p50 != null);
+  const yrAt = (yy) => LV.find((r) => r.year === yy);
+  {
+    const lg = document.getElementById('lg-lt');
+    SC.forEach((s) => { const sp = document.createElement('span'); const i = document.createElement('i'); i.className = 'sw' + (SCSTYLE[s.id][1] ? ' dash' : '');
+      if (SCSTYLE[s.id][1]) i.style.borderTopColor = `var(${SCSTYLE[s.id][0]})`; else i.style.background = `var(${SCSTYLE[s.id][0]})`;
+      sp.appendChild(i); sp.appendChild(document.createTextNode(s.label)); lg.appendChild(sp); });
+    const sp = document.createElement('span'); const i = document.createElement('i'); i.className = 'sw dash'; sp.appendChild(i); sp.appendChild(document.createTextNode('Пороги глубины у месторождений')); lg.appendChild(sp);
+    const lo = d3.min(SC, (s) => ltEnd[s.id]), hi = d3.max(SC, (s) => ltEnd[s.id]);
+    set('lt-note', `Первые два года (ноябрь 2026 — октябрь 2028) — тот же стохастический прогноз, что и выше. Дальше все линии стартуют от его среднего за последний год (${f2(ltStart.stoch_p50)} м). Наша модель — ${f0(20000)} случайных сценариев по статистике годовых изменений уровня 1997–2025 гг. (средний темп ${f1(LT.meta.mu_cm)} см/год). К ${ltEnd.year} г. её медиана — ${f2(ltEnd.stoch_p50)} м (80%: ${f2(ltEnd.stoch_p10)} … ${f2(ltEnd.stoch_p90)}), внешние модели дают от ${f2(hi)} до ${f2(lo)} м. Уровень — среднегодовой; осенью и зимой он примерно на 0,15 м ниже.`);
+    set('lt-foot', 'CMIP6 — суммарное падение за 2020–2100 гг. по лучшим моделям у Samant & Prange (2023): тренд моделей плюс наблюдённый тренд 1996–2021 гг. Для SSP1-2.6 и SSP2-4.5 их итог почти совпадает (−7,9 и −8 м): до 2100 г. сценарии выбросов расходятся слабо, а межмодельный разброс широкий (2–15 м для SSP2-4.5). CESM — модель Бременского университета с водным балансом Каспия (Nandini-Weiss et al., 2020), 9 и 18 м к концу века, разнесены равномерно на 2006–2100 гг. Прямые линии не учитывают, что меньшее море меньше испаряет, поэтому после 2040 г. быстрые сценарии — скорее верхняя граница падения. «—» — до 2056 г. порог не достигается; «суша» — уровень ниже дна.');
+    const dep = (v) => (v <= 0 ? 'суша' : f1(v));
+    const yr = (o, k) => { const v = o[`year_need_${k}`]; return v == null ? '—' : v <= LT.meta.start_year ? 'уже' : String(v); };
+    LT.objects.forEach((o) => {
+      const tr = document.createElement('tr');
+      const nm = (D.objects.find((x) => x.object === o.object) || {}).object || o.object;
+      td(tr, nm, '', o.year_dry_ssp585 || o.year_dry_cesm85 ? `дно обнажается: ${[o.year_dry_cesm85 && `CESM 8.5 — ${o.year_dry_cesm85}`, o.year_dry_ssp585 && `SSP5-8.5 — ${o.year_dry_ssp585}`].filter(Boolean).join(', ')}` : '');
+      td(tr, f1(o.depth_2028_m), 'r');
+      td(tr, dep(o.depth_p50_2056), 'r', `10%: ${dep(o.depth_p10_2056)}`);
+      td(tr, `${f0(Math.round(o.p_below_need_2036 * 100))}% / ${f0(Math.round(o.p_below_need_2056 * 100))}%`, 'r' + (o.p_below_need_2036 >= 0.5 ? ' bad-t' : ''));
+      td(tr, ['stoch', 'ssp245', 'ssp585', 'cesm85'].map((k) => yr(o, k)).join(' · ').replace(/^уже · уже · уже · уже$/, 'уже сейчас'), 'r');
+      td(tr, ['ssp126', 'ssp585', 'cesm85'].map((k) => dep(o[`depth_${k}_2056`])).join(' · '), 'r');
+      document.querySelector('#t-lt tbody').appendChild(tr);
+    });
+  }
+
+  function drawLT() {
+    const box = document.getElementById('ch-lt'); box.querySelector('svg')?.remove();
+    const W = Math.max(300, box.clientWidth), H = W < 600 ? 320 : 420, narrow = W < 600;
+    const svg = d3.select(box).append('svg').attr('viewBox', `0 0 ${W} ${H}`);
+    const dec = (t) => t.getUTCFullYear() + t.getUTCMonth() / 12 + 1 / 24;
+    const obs = full.filter((a) => a.year >= 2000).map((a) => ({x: a.year + 0.5, v: a.mean}));
+    const tail = L.filter((r) => r.t >= Date.UTC(2025, 0, 1)).map((r) => ({x: dec(r.t), v: r.v}));
+    const fcm = [{x: dec(last.t), f: last.v, lo: last.v, hi: last.v}, ...F.map((d) => ({x: dec(d.t), f: d.f, lo: d.lo, hi: d.hi}))];
+    const lt = LV.filter((r) => r.stoch_p50 != null).map((r) => ({...r, x: r.year + 1 / 3}));
+    const ymin = Math.min(d3.min(lt, (r) => Math.min(r.stoch_p10, ...SC.map((s) => r[s.id]))), -33.2);
+    const y = d3.scaleLinear([Math.floor(ymin * 2) / 2, Math.ceil((d3.max(obs, (d) => d.v) + 0.2) * 2) / 2], [H - 28, 12]);
+    const m = {t: 12, r: narrow ? 8 : 136, b: 28, l: Math.ceil(textW(svg, f1(y.domain()[0]))) + 12};
+    const x = d3.scaleLinear([2000, ltEnd.year + 1], [m.l, W - m.r]);
+    svg.append('g').attr('class', 'gridl').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(8).tickSize(-(W - m.l - m.r)).tickFormat(''));
+    svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(8).tickFormat(f1).tickSizeOuter(0)).call(axis).call((g) => g.select('.domain').remove());
+    svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(d3.range(2000, ltEnd.year + 1, narrow ? 10 : 5)).tickFormat((v) => String(v)).tickSizeOuter(0)).call(axis);
+    svg.append('rect').attr('x', x(dec(last.t))).attr('width', x(ltEnd.year + 1) - x(dec(last.t))).attr('y', m.t).attr('height', H - m.t - m.b).attr('fill', css('--line')).attr('opacity', 0.35);
+    // thresholds
+    [{v: -30.0, t: 'Каламкас, Филановского: < 5 м'}, {v: -33.0, t: 'Грайфер: глубина 0'}].forEach((r) => {
+      svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(r.v)).attr('y2', y(r.v)).attr('stroke', css('--ink-3')).attr('stroke-dasharray', '2 4');
+      svg.append('text').attr('class', 'lbl').attr('x', m.l + 6).attr('y', y(r.v) - 6).text(`${r.t} (${f1(r.v)} м)`);
+    });
+    // our model band + median
+    svg.append('path').datum(lt).attr('fill', css('--cool-faint')).attr('d', d3.area().x((d) => x(d.x)).y0((d) => y(d.stoch_p10)).y1((d) => y(d.stoch_p90)));
+    // 2-year stochastic
+    svg.append('path').datum(fcm).attr('fill', css('--cool-soft')).attr('d', d3.area().x((d) => x(d.x)).y0((d) => y(d.lo)).y1((d) => y(d.hi)));
+    svg.append('path').datum(fcm).attr('fill', 'none').attr('stroke', css('--cool')).attr('stroke-width', 1.5).attr('stroke-dasharray', '4 3').attr('d', d3.line().x((d) => x(d.x)).y((d) => y(d.f)));
+    SC.forEach((s) => svg.append('path').datum(lt).attr('fill', 'none').attr('stroke', css(SCSTYLE[s.id][0])).attr('stroke-width', 1.75).attr('stroke-dasharray', SCSTYLE[s.id][1] || null).attr('d', d3.line().x((d) => x(d.x)).y((d) => y(d[s.id]))));
+    svg.append('path').datum(lt).attr('fill', 'none').attr('stroke', css('--cool')).attr('stroke-width', 2.5).attr('d', d3.line().x((d) => x(d.x)).y((d) => y(d.stoch_p50)));
+    svg.append('path').datum(tail).attr('fill', 'none').attr('stroke', css('--ink-3')).attr('stroke-width', 1).attr('d', d3.line().x((d) => x(d.x)).y((d) => y(d.v)));
+    svg.append('path').datum(obs).attr('fill', 'none').attr('stroke', css('--ink')).attr('stroke-width', 2.5).attr('stroke-linejoin', 'round').attr('d', d3.line().x((d) => x(d.x)).y((d) => y(d.v)));
+    // end labels, dodged
+    if (!narrow) {
+      const ends = [...SC.map((s) => ({v: ltEnd[s.id], t: `${SCSHORT[s.id]} ${f2(ltEnd[s.id])}`, c: css(SCSTYLE[s.id][0])})), {v: ltEnd.stoch_p50, t: `наша ${f2(ltEnd.stoch_p50)}`, c: css('--cool')}]
+        .map((e) => ({...e, y: y(e.v)})).sort((a, b) => a.y - b.y);
+      for (let k = 1; k < ends.length; k++) if (ends[k].y - ends[k - 1].y < 14) ends[k].y = ends[k - 1].y + 14;
+      const over = ends[ends.length - 1].y - (H - m.b); if (over > 0) ends.forEach((e) => { e.y -= over; });
+      ends.forEach((e) => svg.append('text').attr('class', 'lbl-strong').attr('x', W - m.r + 6).attr('y', e.y + 4).attr('fill', e.c).style('fill', e.c).text(e.t));
+    }
+    // hover by year
+    const pts = [...obs.map((d) => ({x: d.x, yr: Math.floor(d.x), k: 'obs', v: d.v})),
+      ...F.filter((d) => d.m.endsWith('-04') || d.m.endsWith('-10')).map((d) => ({x: dec(d.t), k: 'fc', v: d.f, d})),
+      ...lt.filter((r) => r.year > ltStart.year).map((r) => ({x: r.x, yr: r.year, k: 'lt', v: r.stoch_p50, r}))];
+    const bis = d3.bisector((d) => d.x).center;
+    const rule = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', css('--ink-3')).attr('opacity', 0);
+    svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent')
+      .on('pointermove', (ev) => { const [px] = d3.pointer(ev); const p = pts[bis(pts, x.invert(px))]; const k = box.clientWidth / W; rule.attr('x1', x(p.x)).attr('x2', x(p.x)).attr('opacity', 1);
+        let head, lines;
+        if (p.k === 'obs') { head = `${p.yr}, наблюдения`; lines = [`среднее за год ${f2(p.v)} м`]; }
+        else if (p.k === 'fc') { head = `${mS(p.d.m)}, стохастический прогноз`; lines = [`${f2(p.d.f)} м`, `80%: ${f2(p.d.lo)} … ${f2(p.d.hi)} м`]; }
+        else { head = `${p.yr}, среднее за год`; lines = [`наша модель ${f2(p.r.stoch_p50)} (80%: ${f2(p.r.stoch_p10)} … ${f2(p.r.stoch_p90)})`, ...SC.map((s) => `${SCSHORT[s.id]}: ${f2(p.r[s.id])}`)]; }
+        tipShow(box, x(p.x) * k, y(p.v) * k, head, lines); })
+      .on('pointerleave', () => { rule.attr('opacity', 0); tipHide(box); });
+  }
+
+  const drawAll = () => { drawLevel(); drawAnnual(); drawSeason(); drawObjects(); drawLT(); };
   drawAll();
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 120); });
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', drawAll);

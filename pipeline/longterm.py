@@ -1,31 +1,47 @@
 """30-year outlook for the Caspian Sea level and depth at LUKOIL objects.
 
-The 24-month statistical forecast does not extend to decades, so the outlook is a set
-of transparent scenarios on the ANNUAL MEAN level (the autumn-winter minimum is
-about 0.15 m lower than the annual mean):
+Stitching
+---------
+Years 1-2 (Nov 2026 - Oct 2028) come from the monthly stochastic ensemble forecast
+(forecast_now.csv, 80% intervals from the hindcast errors). Everything after that starts
+from the end of that forecast: the level of the last forecast year (Nov 2027 - Oct 2028
+mean, assigned to 2028) is the common starting point of all long-term paths.
 
-1. Stochastic model (data-driven): annual change follows an AR(1) process around a
-   mean drift. Drift, its uncertainty, the AR coefficient and the noise are fitted to
-   the observed annual changes 1997-2025. 20,000 Monte Carlo paths give the median
-   and the 10-90% band.
-2. Rate scenarios (straight lines from the 2026 level):
-   - "slow"      -2 m by 2100, lower bound of IO RAS estimates (Kostianoy et al.);
-   - "r2005"     observed rate 2005-2019;
-   - "ssp245"    CMIP6 SSP2-4.5, ~8 m total drop 2020-2100 (Samant & Prange 2023);
-   - "ssp585"    CMIP6 SSP5-8.5, ~14 m total drop 2020-2100 (Samant & Prange 2023);
-   - "r2019"     observed rate 2019-2025.
-Lines ignore the area feedback (a smaller sea evaporates less), so beyond 2040
-the fast scenarios are upper bounds of the decline rather than central estimates.
+Long-term paths, on the ANNUAL MEAN level (autumn-winter minimum is ~0.15 m lower):
+1. "ours"  AR(1) on observed annual-mean changes 1997-2025, mean drift uncertain;
+           20,000 Monte Carlo paths, start level drawn from the 2028 forecast interval.
+2. CMIP6   Samant & Prange 2023 (Commun. Earth Environ. 4, 357): total decline 2020-2100
+           = climate-driven trend of best-fit models + observed 1996-2021 trend (~4.3 m):
+           SSP1-2.6 ~7.9 m (3.65 + 4.3), SSP2-4.5 ~8 m, SSP5-8.5 ~14 m.
+3. CESM    Nandini-Weiss et al. 2020 (Int. J. Climatol. 40, 2717), CESM1.2.2 with the
+           Caspian water balance: ~9 m (RCP4.5) and ~18 m (RCP8.5) by the end of the century,
+           spread here evenly over 2006-2100 (the RCP period).
+Straight lines ignore the area feedback (a smaller sea evaporates less), so beyond
+~2040 the fast scenarios are upper bounds of the decline rather than central estimates.
 """
 import numpy as np
 import pandas as pd
 
 from . import config
 
-HORIZON_YEARS = 30
+END_YEAR = 2056
 FIT_YEARS = (1997, 2025)
 N_PATHS = 20000
 SEED = 20261029
+Z80 = 2.5631  # width of a central 80% normal interval in sigmas
+
+SCENARIOS = [
+    {"id": "ssp126", "group": "CMIP6", "label": "CMIP6 SSP1-2.6: −7,9 м за 2020–2100 гг.", "total_m": 7.9, "span": (2020, 2100),
+     "source": "Samant & Prange 2023: тренд моделей 3,65 м + наблюдённый тренд ~4,3 м"},
+    {"id": "ssp245", "group": "CMIP6", "label": "CMIP6 SSP2-4.5: −8 м за 2020–2100 гг.", "total_m": 8.0, "span": (2020, 2100),
+     "source": "Samant & Prange 2023, межмодельный разброс 2–15 м"},
+    {"id": "ssp585", "group": "CMIP6", "label": "CMIP6 SSP5-8.5: −14 м за 2020–2100 гг.", "total_m": 14.0, "span": (2020, 2100),
+     "source": "Samant & Prange 2023, межмодельный разброс 11–21 м"},
+    {"id": "cesm45", "group": "CESM", "label": "CESM RCP4.5: −9 м к 2100 г.", "total_m": 9.0, "span": (2006, 2100),
+     "source": "Nandini-Weiss et al. 2020 (Бременский университет)"},
+    {"id": "cesm85", "group": "CESM", "label": "CESM RCP8.5: −18 м к 2100 г.", "total_m": 18.0, "span": (2006, 2100),
+     "source": "Nandini-Weiss et al. 2020 (Бременский университет)"},
+]
 
 
 def annual_means(y: pd.Series) -> pd.Series:
@@ -43,10 +59,10 @@ def fit_ar1(changes: np.ndarray):
     return mu, se_mu, phi, sigma
 
 
-def stochastic(start_level: float, start_change: float, mu, se_mu, phi, sigma, years: int):
+def stochastic(start_level, start_sd, start_change, mu, se_mu, phi, sigma, years):
     rng = np.random.default_rng(SEED)
     mus = rng.normal(mu, se_mu, N_PATHS)
-    lev = np.full(N_PATHS, start_level)
+    lev = rng.normal(start_level, start_sd, N_PATHS)
     x = np.full(N_PATHS, start_change)
     out = np.empty((years, N_PATHS))
     for k in range(years):
@@ -56,33 +72,41 @@ def stochastic(start_level: float, start_change: float, mu, se_mu, phi, sigma, y
     return out
 
 
-def run(y: pd.Series, exposure_rows: list):
+def forecast_years(fc: pd.DataFrame):
+    """Two forecast 'years' Nov-Oct from the 24-month monthly forecast."""
+    rows = []
+    for k in range(2):
+        g = fc.iloc[12 * k: 12 * (k + 1)]
+        rows.append({"year": int(str(g.target.iloc[-1])[:4]),
+                     "fc_p50": float(g.forecast.mean()),
+                     "fc_p10": float(g.pi_lo.mean()), "fc_p90": float(g.pi_hi.mean()),
+                     "sd": float((g.pi_hi - g.pi_lo).mean() / Z80)})
+    return rows
+
+
+def run(y: pd.Series, exposure_rows: list, fc_now: pd.DataFrame):
     ann = annual_means(y)
     ch = ann.diff().dropna().loc[FIT_YEARS[0]:FIT_YEARS[1]].to_numpy()
     mu, se_mu, phi, sigma = fit_ar1(ch)
-    start_year = y.index[-1].year                     # 2026
-    start_level = float(y.iloc[-12:].mean())          # last 12 months as the 2026 annual mean
-    start_change = float(ann.iloc[-1] - ann.iloc[-2]) # last full-year change
-    years = np.arange(start_year + 1, start_year + 1 + HORIZON_YEARS)
-    paths = stochastic(start_level, start_change, mu, se_mu, phi, sigma, HORIZON_YEARS)
 
-    def rate(a, b):
-        s = ann.loc[a:b]
-        return float(np.polyfit(s.index.to_numpy(), s.to_numpy(), 1)[0])
+    fy = forecast_years(fc_now)
+    start_year = fy[-1]["year"]                      # 2028
+    start_level = fy[-1]["fc_p50"]
+    start_change = fy[-1]["fc_p50"] - fy[0]["fc_p50"]
+    n = END_YEAR - start_year
+    years = np.arange(start_year + 1, END_YEAR + 1)
+    paths = stochastic(start_level, fy[-1]["sd"], start_change, mu, se_mu, phi, sigma, n)
+    for s in SCENARIOS:
+        s["rate"] = -s["total_m"] / (s["span"][1] - s["span"][0])
 
-    scen = [
-        {"id": "slow", "label": "Замедление: −2 м к 2100 г. (нижняя оценка ИО РАН)", "rate": -2.0 / (2100 - start_year)},
-        {"id": "r2005", "label": "Темп 2005–2019 гг.", "rate": rate(2005, 2019)},
-        {"id": "ssp245", "label": "CMIP6 SSP2-4.5: −8 м за 2020–2100 гг.", "rate": -8.0 / 80},
-        {"id": "ssp585", "label": "CMIP6 SSP5-8.5: −14 м за 2020–2100 гг.", "rate": -14.0 / 80},
-        {"id": "r2019", "label": "Темп 2019–2025 гг.", "rate": rate(2019, 2025)},
-    ]
-    rows = []
+    rows = [{"year": f["year"], "fc_p10": f["fc_p10"], "fc_p50": f["fc_p50"], "fc_p90": f["fc_p90"]} for f in fy]
+    rows[-1].update({"stoch_p10": fy[-1]["fc_p10"], "stoch_p50": start_level, "stoch_p90": fy[-1]["fc_p90"],
+                     **{s["id"]: start_level for s in SCENARIOS}})
     for i, yr in enumerate(years):
         r = {"year": int(yr),
              "stoch_p10": float(np.quantile(paths[i], 0.10)), "stoch_p50": float(np.quantile(paths[i], 0.50)),
              "stoch_p90": float(np.quantile(paths[i], 0.90))}
-        for s in scen:
+        for s in SCENARIOS:
             r[s["id"]] = start_level + s["rate"] * (yr - start_year)
         rows.append(r)
     levels = pd.DataFrame(rows)
@@ -97,19 +121,29 @@ def run(y: pd.Series, exposure_rows: list):
         lvl_need, lvl_dry = datum - (d - need), datum - d
         rec = {"id": o["id"], "object": o["object"], "depth_ref_m": d,
                "level_need_bs": round(lvl_need, 2), "level_dry_bs": round(lvl_dry, 2),
-               "depth_now_m": round(d + start_level - datum, 2)}
-        for s in scen:
+               "depth_2028_m": round(d + start_level - datum, 2)}
+        for s in SCENARIOS + [{"id": "stoch"}]:
             for tag, lv in (("need", lvl_need), ("dry", lvl_dry)):
-                yr = start_year if start_level <= lv else (start_year + (lv - start_level) / s["rate"] if s["rate"] < 0 else None)
-                rec[f"year_{tag}_{s['id']}"] = None if yr is None else round(yr, 1)
+                if s["id"] == "stoch":
+                    hit = np.where(levels.stoch_p50.to_numpy()[1:] <= lv)[0]
+                    yr = None if not len(hit) else int(levels.year.iloc[1 + hit[0]])
+                elif start_level <= lv:
+                    yr = start_year
+                else:
+                    yr = start_year + (lv - start_level) / s["rate"]
+                    yr = None if yr > END_YEAR + 0.5 else int(np.ceil(yr))
+                rec[f"year_{tag}_{s['id']}"] = yr
         for yr in (2036, 2046, 2056):
             i = int(yr - start_year - 1)
             rec[f"p_below_need_{yr}"] = round(float((paths[: i + 1] < lvl_need).any(axis=0).mean()), 3)
             rec[f"depth_p50_{yr}"] = round(d + float(np.quantile(paths[i], 0.5)) - datum, 2)
             rec[f"depth_p10_{yr}"] = round(d + float(np.quantile(paths[i], 0.1)) - datum, 2)
+            for s in SCENARIOS:
+                rec[f"depth_{s['id']}_{yr}"] = round(d + start_level + s["rate"] * (yr - start_year) - datum, 2)
         obj_rows.append(rec)
     objects = pd.DataFrame(obj_rows)
     meta = {"mu_cm": mu * 100, "se_mu_cm": se_mu * 100, "phi": phi, "sigma_cm": sigma * 100,
-            "start_year": start_year, "start_level": start_level, "fit_years": FIT_YEARS,
-            "scenarios": [{**s, "rate_cm": s["rate"] * 100} for s in scen]}
+            "start_year": start_year, "start_level": start_level, "start_sd": fy[-1]["sd"],
+            "fit_years": FIT_YEARS, "end_year": END_YEAR,
+            "scenarios": [{**s, "rate_cm": s["rate"] * 100} for s in SCENARIOS]}
     return levels, hist, objects, meta

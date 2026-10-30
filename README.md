@@ -61,3 +61,11 @@ python report/build.py   # страница report/caspian_report.html с вст
 - Затор 2026 года вызван заилением после половодья, а не только уровнем моря. Альтиметрия видит половодье лишь косвенно. Индикатор `siltation_flag_experimental.csv` придуман после события и не проверен.
 - Ложные тревоги сосредоточены в 2016–2019 годах, когда падение уровня временно остановилось (порог −28,2…−28,5 м: 13–25 месяцев тревоги без пересечения в 24-месячном окне).
 - В модель не входят сток Волги, испарение и климатические сценарии. Следующий шаг — добавить сток Волги (ECOMAG или данные Росгидромета) как внешний предиктор.
+
+## 30-year outlook (to 2056)
+
+`pipeline/longterm.py`: years 1-2 come from the monthly stochastic ensemble forecast; from 2028 on,
+our AR(1) model on annual-mean changes (20,000 paths), CMIP6 SSP1-2.6 / SSP2-4.5 / SSP5-8.5
+(Samant & Prange 2023, Commun. Earth Environ.) and CESM RCP4.5 / RCP8.5 (Nandini-Weiss et al. 2020,
+Int. J. Climatol.). All paths start from the 2028 forecast. The standalone MWS page is built with
+`python report/build_mws.py` -> `report/caspian_shallowing_mws.html`.

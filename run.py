@@ -71,13 +71,6 @@ def main():
     print(expo[expo.depth_basis == "min"][["id", "depth_now_m", "depth_fc_min_m", "depth_fc_p10_m",
                                             "p24_calm", "year_calm_r2019"]].to_string(index=False))
 
-    # 30-year outlook (scenarios + stochastic model on annual means)
-    lt_levels, lt_hist, lt_objects, lt_meta = longterm.run(y, expo.to_dict("records"))
-    lt_hist.merge(lt_levels, on="year", how="outer").round(3).to_csv(config.OUT_DIR / "longterm_levels.csv", index=False)
-    lt_objects.to_csv(config.OUT_DIR / "longterm_objects.csv", index=False)
-    (config.OUT_DIR / "longterm_meta.json").write_text(json.dumps(lt_meta, ensure_ascii=False, indent=1, default=str))
-    print("longterm 2056 median", round(float(lt_levels.stoch_p50.iloc[-1]), 2))
-
     rise = alerts.spring_rise(y)
     rise.to_csv(config.OUT_DIR / "spring_rise.csv")
     silt = alerts.compound_siltation_flag(y, rise)
@@ -116,6 +109,13 @@ def main():
     pd.DataFrame(now).to_csv(config.OUT_DIR / "forecast_now.csv", index=False)
     print("now:", now["target"][11], now["forecast"][11], now["pi_lo"][11], now["pi_hi"][11],
           "| min next 24m:", min(now["forecast"]))
+
+    # 30-year outlook (scenarios + stochastic model on annual means)
+    lt_levels, lt_hist, lt_objects, lt_meta = longterm.run(y, expo.to_dict("records"), pd.DataFrame(now))
+    lt_hist.merge(lt_levels, on="year", how="outer").round(3).to_csv(config.OUT_DIR / "longterm_levels.csv", index=False)
+    lt_objects.to_csv(config.OUT_DIR / "longterm_objects.csv", index=False)
+    (config.OUT_DIR / "longterm_meta.json").write_text(json.dumps(lt_meta, ensure_ascii=False, indent=1, default=str))
+    print("longterm 2056 median", round(float(lt_levels.stoch_p50.iloc[-1]), 2))
 
     bundle = {
         "now": now,
